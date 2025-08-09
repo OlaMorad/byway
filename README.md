@@ -1,61 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ByWay - Online Learning Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
+ByWay is a comprehensive online learning management system inspired by platforms like Udemy. It provides a seamless experience for learners, instructors, and administrators through a robust set of features, including course browsing, payment processing, instructor revenue analytics, and an admin dashboard for platform management. The system is built with a focus on user authentication, course management, and secure payment integration, ensuring a scalable and user-friendly experience.
 
-## About Laravel
+## Project Goal
+The goal of ByWay is to create an interactive and efficient e-learning platform that supports:
+- Learners in discovering, enrolling, and engaging with courses.
+- Instructors in creating, managing, and monetizing their courses.
+- Administrators in overseeing platform operations, user management, and financial transactions.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The project was developed by a team of four trainees (Mohamed, Ola, Mennah, Asmaa) over two weeks, with tasks distributed to cover authentication, learner features, instructor features, and the admin dashboard.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Authentication
+- **User Registration**: Single endpoint for learners and instructors to create accounts, with email verification and social login (at least one of Facebook, Google, or Microsoft).
+- **Login**: Unified endpoint for learners, instructors, and admins.
+- **Forgot Password**: Password reset via email with a secure, time-limited link.
+- **Logout**: Secure session termination.
 
-## Learning Laravel
+### Learner Features
+- **Profile Management**: Update personal information (refer to Figma design).
+- **Enrolled Courses**: View and track progress in enrolled courses.
+- **Course Browsing**: Smart search and filtering for courses and instructors.
+- **Favorites & Cart**: Add courses to favorites or cart for purchase.
+- **Course Details**: View detailed course information, including reviews (only enrolled learners can review).
+- **Video Playback**: Watch course videos and mark them as completed.
+- **Payment**: Purchase courses or cart items using Fawry, E-Wallet, or Credit/Debit Card, with email and in-app notifications.
+- **Payment History**: View transaction history.
+- **Payment Methods**: Add and manage payment methods.
+- **Notifications**: View and manage in-app notifications.
+- **Account Closure**: Option to permanently close an account.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Instructor Features
+- **Profile Management**: Update profile details, including social media links (refer to Figma design).
+- **Course Management**: Create, edit, delete, search, and filter courses.
+- **Course Details**: View detailed course information, including enrolled students and reviews.
+- **Reviews**: View all reviews for their courses.
+- **Revenue Analytics**: View total profits, available balance, last transaction, and performance charts.
+- **Withdrawal Requests**: Request withdrawals of available balance (refer to Figma design).
+- **Notifications**: View and manage in-app notifications.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Admin Dashboard
+- **Overview**: Displays charts and metrics for active learners, instructors, published courses, total revenue, top-rated courses, and recent payout requests.
+- **User Management**: Manage learner accounts (view, edit, delete, or suspend).
+- **Instructor Management**: Add, view, edit, or suspend instructor accounts.
+- **Course Management**: Approve, edit, or delete courses.
+- **Payments & Revenue**: Monitor transactions and manage payout requests.
+- **Reviews & Ratings**: Manage course reviews, with the ability to remove inappropriate ones.
+- **Platform Settings**: Configure categories, payment policies, and notification settings.
+- **Reports & Analytics**: Generate detailed reports on platform performance, user growth, and revenue.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Project Structure
+The project is divided into three main modules, developed over two weeks:
+    - **Authentication**: Handled by Mennah, covering registration, login, password reset, and logout.
+    - **Learner Features**: Split between Mennah (core features like profile, course browsing, and notifications) and Mohamed (payment-related features).
+    - **Instructor Features**: Split between Asmaa (core features like profile and course management) and Mohamed (revenue and withdrawal features).
+    - **Admin Dashboard**: Handled by Ola, covering all admin-related functionalities.
 
-## Laravel Sponsors
+### Task Distribution
+- **Mennah**: Authentication, learner profile, enrolled courses, course browsing, favorites/cart, course details, video playback, and learner notifications.
+- **Mohamed**: Payment history, payment processing, payment methods, instructor revenue analytics, withdrawal requests, and instructor notifications.
+- **Asmaa**: Instructor profile, course creation, course management, course details, instructor reviews.
+- **Ola**: Admin dashboard, including overview, user management, instructor management, course management, payments, reviews, platform settings, and analytics.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Technologies Used
+- **Backend**: Laravel
+- **Database**: MySql
+- **Payment Integration**: Support for Fawry, E-Wallet, and Credit/Debit Card (mock or real APIs).
+- **Authentication**: JWT , email verification, and social login.
+- **Design**: Figma for UI/UX reference.
 
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Contributors
+- **Mohamed**: Payment and revenue-related features.
+- **Ola**: Admin dashboard.
+- **Mennah**: Authentication and core learner features.
+- **Asmaa**: Instructor features.
 
 ## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+[Specify license, e.g., MIT License]
