@@ -21,6 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'image',
+        'role',
+        'status',
+        'nationality',
+        'bio',
+        'total_earnings',
     ];
 
     /**
@@ -43,6 +49,31 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'created_at' => 'datetime',
         ];
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+    public function instructorTransactions()
+    {
+        return $this->hasMany(InstructorTransaction::class);
+    }
+
+    public function learnerTransactions()
+    {
+        return $this->hasMany(LearnerTransaction::class);
+    }
+
+    public function userCourses()
+    {
+        return $this->hasMany(UserCourse::class);
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }
