@@ -67,4 +67,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+    public function favoriteCourses()
+    {
+        return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
+    }
 }

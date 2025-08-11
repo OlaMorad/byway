@@ -41,4 +41,8 @@ class Course extends Model
     {
         return $this->hasMany(UserCourse::class);
     }
+    public function favoredByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
 }
