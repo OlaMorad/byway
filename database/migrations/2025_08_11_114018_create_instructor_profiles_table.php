@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_transactions', function (Blueprint $table) {
+        Schema::create('instructor_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->decimal('amount', 10, 2);
-            $table->enum('status', ["pending", "completed"]);
-            $table->string('method');
-            $table->string('account_num');
+            $table->text('bio');
+            $table->decimal('total_earnings', 10, 2)->default(0);
+            // Social Media Links
+            $table->string('github_link')->nullable();
+            $table->string('google_link')->nullable();
+            $table->string('facebook_link')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_transactions');
+        Schema::dropIfExists('instructor_profiles');
     }
 };

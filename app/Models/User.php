@@ -25,8 +25,6 @@ class User extends Authenticatable
         'role',
         'status',
         'nationality',
-        'bio',
-        'total_earnings',
     ];
 
     /**
@@ -56,11 +54,6 @@ class User extends Authenticatable
     public function reviews()
     {
         return $this->hasMany(Review::class);
-    }
-
-    public function userCourses()
-    {
-        return $this->hasMany(UserCourse::class);
     }
 
     public function notifications()

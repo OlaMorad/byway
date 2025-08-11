@@ -16,6 +16,7 @@ class Course extends Model
         'status',
         'price',
         'category_id',
+        'user_id'
     ];
 
     protected $casts = [
@@ -37,10 +38,6 @@ class Course extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function userCourses()
-    {
-        return $this->hasMany(UserCourse::class);
-    }
     public function favoredByUsers()
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
