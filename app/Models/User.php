@@ -57,15 +57,6 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
-    public function instructorTransactions()
-    {
-        return $this->hasMany(InstructorTransaction::class);
-    }
-
-    public function learnerTransactions()
-    {
-        return $this->hasMany(LearnerTransaction::class);
-    }
 
     public function userCourses()
     {

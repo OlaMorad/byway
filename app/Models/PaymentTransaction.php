@@ -2,15 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class InstructorTransaction extends Model
+class PaymentTransaction extends Model
 {
-    use HasFactory;
-
-    protected $table = 'instructor_transaction';
-
     protected $fillable = [
         'user_id',
         'amount',
@@ -26,5 +21,9 @@ class InstructorTransaction extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function order()
+    {
+        return $this->hasOne(Order::class);
     }
 }

@@ -11,19 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::disableForeignKeyConstraints();
-
-        Schema::create('instructor_transaction', function (Blueprint $table) {
+        Schema::create('payment_transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users');
-            $table->decimal('amount');
-            $table->enum('status', ["pending","completed"]);
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->decimal('amount', 10, 2);
+            $table->enum('status', ["pending", "completed"]);
             $table->string('method');
             $table->string('account_num');
             $table->timestamps();
         });
-
-        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('instructor_transaction');
+        Schema::dropIfExists('payment_transactions');
     }
 };

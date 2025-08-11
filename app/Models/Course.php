@@ -36,10 +36,6 @@ class Course extends Model
     {
         return $this->hasMany(Review::class);
     }
-    public function learnerTransactions()
-    {
-        return $this->hasMany(LearnerTransaction::class);
-    }
 
     public function userCourses()
     {
