@@ -10,12 +10,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::controller(AuthController::class)->group(function () {
-    Route::post('register', 'register');
-    Route::post('login', 'login');
-
-});
-
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('payment-methods/setup-intent' , [PaymentMethodController::class, 'createSetupIntent']);
     Route::apiResource('payment-methods', PaymentMethodController::class);
