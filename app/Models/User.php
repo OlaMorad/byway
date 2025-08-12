@@ -6,25 +6,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable , HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'image',
-        'role',
-        'status',
-        'nationality',
+    protected $guarded = [
+        'id'
     ];
 
     /**
@@ -55,11 +50,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
+    
     public function favoriteCourses()
     {
         return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
@@ -67,5 +58,10 @@ class User extends Authenticatable
     public function courses()
     {
         return $this->hasMany(Course::class);
+    }
+
+        public function paymentMethods()
+    {
+        return $this->hasMany(PaymentMethod::class);
     }
 }
