@@ -23,6 +23,10 @@ return new class extends Migration
             $table->string('nationality')->nullable();
             $table->rememberToken();
             $table->string('stripe_customer_id')->nullable()->unique();
+            $table->string('verification_code')->nullable(); // OTP
+            $table->boolean('is_verified')->default(false);
+            $table->string('provider')->nullable(); // google, facebook
+            $table->string('provider_id')->nullable();
             $table->timestamps();
         });
 
