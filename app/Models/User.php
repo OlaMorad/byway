@@ -31,7 +31,36 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = ['name', 'email', 'password', 'role', 'verification_code'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'verification_code','image',
+        'first_name',
+        'last_name',
+        'headline',
+        'about',
+        'twitter_link',
+        'linkedin_link',
+        'youtube_link',
+        'facebook_link',];
+
+    // Accessors for links
+    public function getTwitterLinkAttribute($value)
+    {
+        return $value ?? 'https://twitter.com';
+    }
+
+    public function getLinkedInLinkAttribute($value)
+    {
+        return $value ?? 'https://www.linkedin.com';
+    }
+
+    public function getYoutubeLinkAttribute($value)
+    {
+        return $value ?? 'https://www.youtube.com';
+    }
+
+    public function getFacebookLinkAttribute($value)
+    {
+        return $value ?? 'https://www.facebook.com';
+    }    
 
     /*protected $guarded = [
         'id'
