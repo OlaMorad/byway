@@ -12,5 +12,5 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('payment-methods/setup-intent' , [PaymentMethodController::class, 'createSetupIntent']);
-    Route::apiResource('payment-methods', PaymentMethodController::class);
+    Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
 });
