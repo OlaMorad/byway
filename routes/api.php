@@ -35,3 +35,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
 });
+
+Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
+Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+
+
+//store course//
+    Route::post('/courses', [CourseController::class, 'store']);
