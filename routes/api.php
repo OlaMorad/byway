@@ -1,11 +1,16 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\UserManagementController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -34,4 +39,22 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
+});
+Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
+Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
+
+Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index']);   // عرض جميع المستخدمين
+    Route::get('/users/{id}', [UserManagementController::class, 'show']);         // عرض بروفايل مستخدم
+    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']); // تغيير حالة الحساب
+    Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
+});
+Route::get('/courses', [CourseManagementController::class, 'index']);
+Route::delete('/courses/{id}', [CourseManagementController::class, 'destroy']);
+Route::patch('/courses/approve/{id}', [CourseManagementController::class, 'approve']);
+Route::get('/instructors', [UserManagementController::class, 'allInstructors']);
+Route::prefix('reviews')->group(function () {
+    Route::get('/', [ReviewManagementController::class, 'index']);       // عرض كل الريفيوهات
+    Route::get('/{id}', [ReviewManagementController::class, 'show']);   // عرض ريفيو واحد
+    Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
 });

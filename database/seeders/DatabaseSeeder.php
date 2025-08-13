@@ -9,7 +9,7 @@ use App\Models\Review;
 use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Database\Factories\ReviewsFactory;
+use Database\Factories\ReviewFactory;
 
 class DatabaseSeeder extends Seeder
 {
@@ -24,6 +24,6 @@ class DatabaseSeeder extends Seeder
         ]);
         Course::factory(10)->create();
         Lesson::factory(50)->create();
-        Review::factory(50)->create();        
+        Review::factory(50)->create();
     }
 }
