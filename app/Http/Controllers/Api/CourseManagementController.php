@@ -26,4 +26,18 @@ class CourseManagementController extends Controller
     {
         return $this->courseManagementServices->approveCourse($courseId);
     }
+    // تعديل بيانات الكورس
+    public function update(Request $request, $courseId)
+    {
+        $validated = $request->validate([
+            'title'       => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'price'       => 'sometimes|numeric|min:0',
+            'category_id' => 'sometimes|exists:categories,id',
+            'video_url'   => 'sometimes|url',
+            'status'      => 'sometimes|in:published,unpublished',
+        ]);
+
+        return $this->courseManagementServices->updateCourse($courseId, $validated);
+    }
 }
