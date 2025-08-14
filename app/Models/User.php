@@ -85,6 +85,11 @@ class User extends Authenticatable
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+
     public function toSearchableArray()
     {
         return [
@@ -94,5 +99,6 @@ class User extends Authenticatable
             'status' => $this->status,
             'nationality' => $this->nationality,
         ];
+
     }
 }
