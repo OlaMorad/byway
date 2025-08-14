@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Scout\Searchable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -84,8 +85,20 @@ class User extends Authenticatable
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
+
     public function carts()
     {
         return $this->hasMany(Cart::class);
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+            'role' => $this->role,
+            'status' => $this->status,
+            'nationality' => $this->nationality,
+        ];
+
     }
 }

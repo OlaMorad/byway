@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,15 +43,27 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
 });
+
+Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
+Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+
+
+//store course//
+    Route::post('/courses', [CourseController::class, 'store']);
+
 Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
 Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index']);   // عرض جميع المستخدمين
+    Route::get('/users/search', [UserManagementController::class, 'searchUsers']); 
     Route::get('/users/{id}', [UserManagementController::class, 'show']);         // عرض بروفايل مستخدم
-    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']); // تغيير حالة الحساب
+    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
+    Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
 });
+
 Route::get('/courses', [CourseManagementController::class, 'index']);
 Route::delete('/courses/{id}', [CourseManagementController::class, 'destroy']);
 Route::patch('/courses/approve/{id}', [CourseManagementController::class, 'approve']);
@@ -67,3 +81,4 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
     Route::post('/cart',   'add');
     Route::delete('/cart/{course}','remove');
 });
+
