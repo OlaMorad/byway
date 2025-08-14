@@ -16,7 +16,7 @@ use Laravel\Scout\Searchable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens, Searchable;
-  
+
       /**
      * The attributes that are mass assignable.
      *
@@ -63,7 +63,7 @@ class User extends Authenticatable
     public function getFacebookLinkAttribute($value)
     {
         return $value ?? 'https://www.facebook.com';
-    }    
+    }
 
     /*protected $guarded = [
 
@@ -138,7 +138,7 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
-
+    }
     public function toSearchableArray()
     {
         return [
