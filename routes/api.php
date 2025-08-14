@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseManagementController;
@@ -41,6 +43,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
+Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
+Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+
+
+//store course//
+    Route::post('/courses', [CourseController::class, 'store']);
+
 Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
 Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
 
@@ -62,3 +72,4 @@ Route::prefix('reviews')->group(function () {
     Route::get('/{id}', [ReviewManagementController::class, 'show']);   // عرض ريفيو واحد
     Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
 });
+
