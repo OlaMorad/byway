@@ -62,9 +62,15 @@ class UserManagementServices
 
     public function searchUsers($key)
     {
+        if (empty($key)) {
+            return ApiResponse::sendResponse(400, 'Search key is required', []);
+        }
+
         $users = User::search($key)->get();
 
-        return ApiResponse::sendResponse(200, 'Users search results retrieved successfully', $users);
+        $filteredUsers = $users->where('role', '!=', 'learner')->values();
+
+        return ApiResponse::sendResponse(200, 'Users search results retrieved successfully', $filteredUsers);
     }
     public function UpdateUser($userId, array $data)
     {
