@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
 
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
