@@ -10,6 +10,10 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\ProfileController;
+
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CourseManagementController;
@@ -42,6 +46,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
+});
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
 });
 
 Route::get('/teacher/profile', [TeacherProfileController::class,'show']);

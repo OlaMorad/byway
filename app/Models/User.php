@@ -7,19 +7,68 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
+use App\Notifications\CustomPasswordReset;
+
 use Laravel\Scout\Searchable;
+
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, Searchable;
-
-    /**
+  
+      /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
+
+    protected $fillable = ['name', 'email', 'password', 'role', 'verification_code','image',
+        'first_name',
+        'last_name',
+        'headline',
+        'about',
+        'twitter_link',
+        'linkedin_link',
+        'youtube_link',
+        'facebook_link',];
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomPasswordReset($token));
+    }
+
+    // Accessors for links
+    public function getTwitterLinkAttribute($value)
+    {
+        return $value ?? 'https://twitter.com';
+    }
+
+    public function getLinkedInLinkAttribute($value)
+    {
+        return $value ?? 'https://www.linkedin.com';
+    }
+
+    public function getYoutubeLinkAttribute($value)
+    {
+        return $value ?? 'https://www.youtube.com';
+    }
+
+    public function getFacebookLinkAttribute($value)
+    {
+        return $value ?? 'https://www.facebook.com';
+    }    
+
+    /*protected $guarded = [
+
     protected $guarded = [
+
         'id'
     ];
 
