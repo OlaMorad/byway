@@ -11,14 +11,13 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable , HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-
     protected $guarded = [
         'id'
     ];
@@ -35,9 +34,18 @@ class User extends Authenticatable
     ];
 
     // Optional helper methods
-    public function isLearner() { return $this->role === 'learner'; }
-    public function isTeacher() { return $this->role === 'teacher'; }
-    public function isAdmin()   { return $this->role === 'admin'; }
+    public function isLearner()
+    {
+        return $this->role === 'learner';
+    }
+    public function isTeacher()
+    {
+        return $this->role === 'teacher';
+    }
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
     /**
      * Get the attributes that should be cast.
      *
@@ -56,7 +64,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class);
     }
-    
+
     public function favoriteCourses()
     {
         return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
@@ -66,8 +74,13 @@ class User extends Authenticatable
         return $this->hasMany(Course::class);
     }
 
-        public function paymentMethods()
+    public function paymentMethods()
     {
         return $this->hasMany(PaymentMethod::class);
+    }
+
+    public function instructorProfile()
+    {
+        return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 }
