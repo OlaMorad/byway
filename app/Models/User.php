@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
+use App\Notifications\CustomPasswordReset;
+
 use Laravel\Scout\Searchable;
 
 use App\Notifications\CustomPasswordReset;
@@ -86,6 +89,7 @@ class User extends Authenticatable
 
     protected $guarded = [
 
+
         'id'
     ];
 
@@ -138,6 +142,7 @@ class User extends Authenticatable
     }
 
 
+
     public function paymentMethods()
     {
         return $this->hasMany(PaymentMethod::class);
@@ -162,7 +167,26 @@ class User extends Authenticatable
             'status' => $this->status,
             'nationality' => $this->nationality,
         ];
+    }
 
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
+    }
+
+    // Check if deletion is pending
+    public function isPendingDeletion()
+    {
+        return $this->status === 'pending_deletion';
+    }
+
+    // Check if within cancellation window (14 days)
+    public function canCancelDeletion()
+    {
+        if (!$this->isPendingDeletion()) return false;
+
+        return $this->deletion_requested_at->addDays(14)->isFuture();
     }
 
     public function orders() {
