@@ -6,12 +6,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CourseManagementController;
 use App\Http\Controllers\Api\ReviewManagementController;
+use App\Http\Controllers\Api\InstructorRevenueController;
+use App\Http\Controllers\Api\TeacherNotificationController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -67,3 +71,24 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
     Route::post('/cart',   'add');
     Route::delete('/cart/{course}','remove');
 });
+
+ Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
+ Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
+ Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
+
+ Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics']);
+});
+
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get   ('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
+    Route::post  ('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
+    Route::post  ('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
+    Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
+    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']); 
+});
+
+
+
+
