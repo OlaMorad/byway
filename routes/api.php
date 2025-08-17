@@ -1,6 +1,8 @@
 <?php
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -80,8 +82,11 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users/{id}', [UserManagementController::class, 'show']);         // عرض بروفايل مستخدم
     Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
     Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
+    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
+    Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
 });
+
 
 Route::get('/courses', [CourseManagementController::class, 'index']);
 Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);

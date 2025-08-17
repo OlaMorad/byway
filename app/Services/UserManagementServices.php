@@ -60,7 +60,7 @@ class UserManagementServices
         User::findOrFail($userId)->delete();
         return ApiResponse::sendResponse(200, 'User account deleted successfully');
     }
-    // البحث عن اليوزر
+
     public function searchUsers($key)
     {
         if (empty($key)) {
@@ -69,23 +69,10 @@ class UserManagementServices
 
         $users = User::search($key)->get();
 
-        $filteredUsers = $users->where('role', '!=', 'admin')
-            ->map(function ($user) {
-                return [
-                    'id'          => $user->id,
-                    'name'        => $user->name,
-                    'email'       => $user->email,
-                    'image'       => $user->image,
-                    'role'        => $user->role,
-                    'status'      => $user->status,
-                    'nationality' => $user->nationality,
-                    'created_at'  => $user->created_at,
-                ];
-            })->values();
+        $filteredUsers = $users->where('role', '!=', 'learner')->values();
 
         return ApiResponse::sendResponse(200, 'Users search results retrieved successfully', $filteredUsers);
     }
-    // تعديل حساب اليوزر
     public function UpdateUser($userId, array $data)
     {
         $user = User::findOrFail($userId);
