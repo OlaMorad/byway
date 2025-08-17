@@ -43,9 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
 });
 
+Route::middleware(['auth:sanctum'])->group(function () {
+
+
 Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
 Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
 Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+
 
 
 //store course//
@@ -72,4 +76,10 @@ Route::prefix('reviews')->group(function () {
     Route::get('/{id}', [ReviewManagementController::class, 'show']);   // عرض ريفيو واحد
     Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
 });
+
+
+//manage course
+    Route::get('/instructor/courses', [CourseController::class, 'listCourses']);
+    Route::put('/instructor/courses/{id}', [CourseController::class, 'update']);
+    Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy']);
 
