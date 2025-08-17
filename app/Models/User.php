@@ -11,12 +11,17 @@ use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\CustomPasswordReset;
 
 use Laravel\Scout\Searchable;
+
+use App\Notifications\CustomPasswordReset;
+
+use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens, Searchable, SoftDeletes;
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -84,6 +89,7 @@ class User extends Authenticatable
 
     protected $guarded = [
 
+
         'id'
     ];
 
@@ -136,6 +142,7 @@ class User extends Authenticatable
     }
 
 
+
     public function paymentMethods()
     {
         return $this->hasMany(PaymentMethod::class);
@@ -150,7 +157,41 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
+
+    public function toSearchableArray()
+    {
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+            'role' => $this->role,
+            'status' => $this->status,
+            'nationality' => $this->nationality,
+        ];
     }
+
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
+    }
+
+    // Check if deletion is pending
+    public function isPendingDeletion()
+    {
+        return $this->status === 'pending_deletion';
+    }
+
+    // Check if within cancellation window (14 days)
+    public function canCancelDeletion()
+    {
+        if (!$this->isPendingDeletion()) return false;
+
+        return $this->deletion_requested_at->addDays(14)->isFuture();
+    }
+
+    public function orders() {
+    return $this->hasMany(Order::class);
+}
     public function toSearchableArray()
     {
         return [

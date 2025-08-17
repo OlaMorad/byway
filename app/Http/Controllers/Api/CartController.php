@@ -33,7 +33,8 @@ class CartController extends Controller
     {
         $cartItem = Cart::where([
             'user_id' => $request->user()->id,
-            'course_id' => $courseId
+            'course_id' => $courseId,
+            'user_id' => $request->user()->id
         ])->first();
 
         if (!$cartItem) {
