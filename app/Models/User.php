@@ -12,9 +12,6 @@ use App\Notifications\CustomPasswordReset;
 
 use Laravel\Scout\Searchable;
 
-use App\Notifications\CustomPasswordReset;
-
-use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
@@ -157,6 +154,7 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
 
     public function toSearchableArray()
     {
