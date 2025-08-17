@@ -156,28 +156,7 @@ class User extends Authenticatable
         return $this->hasMany(Cart::class);
     }
 
-    public function toSearchableArray()
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'status' => $this->status,
-            'nationality' => $this->nationality,
-        ];
-    }
-
-
-    public function courses()
-    {
-        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
-    }
-
-    // Check if deletion is pending
-    public function isPendingDeletion()
-    {
-        return $this->status === 'pending_deletion';
-    }
+    
 
     // Check if within cancellation window (14 days)
     public function canCancelDeletion()
@@ -211,14 +190,6 @@ class User extends Authenticatable
     public function isPendingDeletion()
     {
         return $this->status === 'pending_deletion';
-    }
-
-    // Check if within cancellation window (14 days)
-    public function canCancelDeletion()
-    {
-        if (!$this->isPendingDeletion()) return false;
-
-        return $this->deletion_requested_at->addDays(14)->isFuture();
     }
 
     public function enrollments()

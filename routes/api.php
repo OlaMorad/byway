@@ -1,9 +1,6 @@
 <?php
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\TeacherProfileController;
-use App\Http\Controllers\CourseController;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
@@ -13,9 +10,6 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\ProfileController;
 
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
