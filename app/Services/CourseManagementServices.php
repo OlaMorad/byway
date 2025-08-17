@@ -46,4 +46,33 @@ class CourseManagementServices
         Course::where('id', $courseId)->delete();
         return ApiResponse::sendResponse(200, 'Course deleted successfully');
     }
+
+    // تعديل بيانات الكورس
+    public function updateCourse($courseId, $data)
+    {
+        $course = Course::findOrFail($courseId);
+
+        // تحديث البيانات المطلوبة
+        $course->update([
+            'title'       => $data['title'] ?? $course->title,
+            'description' => $data['description'] ?? $course->description,
+            'price'       => $data['price'] ?? $course->price,
+            'category_id' => $data['category_id'] ?? $course->category_id,
+        ]);
+        $course->load(['user:id,name', 'category:id,name']);
+
+        $CourseData = [
+            'id' => $course->id,
+            'title' => $course->title,
+            'description' => $course->description,
+            'video_url' => $course->video_url,
+            'status' => $course->status,
+            'price' => $course->price,
+            'instructor_name' => $course->user->name ?? null,
+            'category_name' => $course->category->name ?? null,
+            'created_at' => $course->created_at,
+
+        ];
+        return ApiResponse::sendResponse(200, 'Course updated successfully', $CourseData);
+    }
 }

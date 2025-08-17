@@ -1,4 +1,6 @@
 <?php
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -9,11 +11,18 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Api\ProfileController;
+
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CourseManagementController;
 use App\Http\Controllers\Api\ReviewManagementController;
+use App\Http\Controllers\Api\LearnerCourseController;
+use App\Http\Controllers\Api\Learner\CourseInteractionController;
+use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
 
@@ -45,17 +54,38 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout']);
 });
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
+});
+
+Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
+Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+
+
+//store course//
+    Route::post('/courses', [CourseController::class, 'store']);
+
 Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
 Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/users', [UserManagementController::class, 'index']);   // عرض جميع المستخدمين
+    Route::get('/users/search', [UserManagementController::class, 'searchUsers']);
     Route::get('/users/{id}', [UserManagementController::class, 'show']);         // عرض بروفايل مستخدم
-    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']); // تغيير حالة الحساب
+    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
+    Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
 });
+
 Route::get('/courses', [CourseManagementController::class, 'index']);
-Route::delete('/courses/{id}', [CourseManagementController::class, 'destroy']);
+Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);
+Route::delete('/courses/{courseId}', [CourseManagementController::class, 'destroy']);
 Route::patch('/courses/approve/{id}', [CourseManagementController::class, 'approve']);
 Route::get('/instructors', [UserManagementController::class, 'allInstructors']);
 Route::prefix('reviews')->group(function () {
@@ -92,3 +122,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
 
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/learner/courses', [LearnerCourseController::class, 'index']);
+});
+
+Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
+    Route::post('/close-account', [ProfileController::class, 'closeAccount']);
+    Route::get('/status', [ProfileController::class, 'status']);
+});
+
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Favorites
+    Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);
+    Route::post('/favorites/remove', [CourseInteractionController::class, 'removeFromFavorites']);
+    Route::get('/favorites', [CourseInteractionController::class, 'getFavorites']);
+
+    // Cart
+    Route::post('/cart/add', [CourseInteractionController::class, 'addToCart']);
+    Route::post('/cart/remove', [CourseInteractionController::class, 'removeFromCart']);
+    Route::get('/cart', [CourseInteractionController::class, 'getCart']);
+});
+
+// Public route – no login required
+Route::get('/courses/{id}', [CourseShowController::class, 'show']);
