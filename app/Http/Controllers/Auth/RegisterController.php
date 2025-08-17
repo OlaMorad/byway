@@ -38,7 +38,7 @@ class RegisterController extends Controller
         // Send verification email
         $this->sendVerificationEmail($user);
 
-        return ApiResponse::sendResponse(201, 'Registration successful. Check your email for the verification code.', [
+        return ApiResponse::sendResponse(201, "Registration successful. Check your email for the verification code.->$code", [
             'user_id' => $user->id,
             'name'=>$user->name,
             'role' => $user->role,
