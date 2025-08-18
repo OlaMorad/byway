@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 
@@ -25,6 +26,7 @@ use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
 use App\Http\Controllers\Api\Learner\CourseProgressController;
+use App\Http\Controllers\Api\Learner\NotificationController;
 
 
 Route::get('/user', function (Request $request) {
@@ -33,7 +35,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('payment-methods/setup-intent' , [PaymentMethodController::class, 'createSetupIntent']);
+    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
     Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
 });
 
@@ -66,13 +68,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
 Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
 Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
 
 
 //store course//
-    Route::post('/courses', [CourseController::class, 'store']);
+Route::post('/courses', [CourseController::class, 'store']);
 
 Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
 Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
@@ -108,24 +110,24 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
     // Cart
     Route::get('/cart',  'index');
     Route::post('/cart',   'add');
-    Route::delete('/cart/{course}','remove');
+    Route::delete('/cart/{course}', 'remove');
 });
 
- Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
- Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
- Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
+Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
+Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
+Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
 
- Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics']);
 });
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get   ('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
-    Route::post  ('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
-    Route::post  ('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
+    Route::get('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
+    Route::post('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
+    Route::post('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
     Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
-    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']); 
+    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']);
 });
 
 
@@ -162,4 +164,15 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
 
     // Submit course review
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
+});
+
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Get all notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
+
+    // Mark as read
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+    // Delete notification
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 });
