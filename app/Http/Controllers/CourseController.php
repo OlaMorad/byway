@@ -1,28 +1,26 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Course;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Helpers\ApiResponse;
 use Illuminate\Support\Facades\Auth;
-
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
-
 {
-
-
+    // إنشاء كورس جديد
     public function store(Request $request)
-{
-    $validatecourses = $request->validate([
-        'title'       => 'required|string|max:255',
-        'description' => 'required|string',
-        'video'       => 'required|file|mimes:mp4,mov,avi|max:204800', // 200MB
-        'status'      => 'required|in:published,unpublished',
-        'price'       => 'required|numeric|min:0',
-        'category_id' => 'required|exists:categories,id'
-    ]);
+    {
+        $validatecourses = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string',
+            'video'       => 'required|file|mimes:mp4,mov,avi|max:204800', // 200MB
+            'status'      => 'required|in:published,unpublished',
+            'price'       => 'required|numeric|min:0',
+            'category_id' => 'required|exists:categories,id'
+        ]);
 
 
         // لو فيه فيديو يترفع
@@ -41,35 +39,34 @@ class CourseController extends Controller
         'video_url'=>$videoPath
     ]);
 
-    return ApiResponse::sendResponse(200, 'Course created successfully', $course);
-}
+        return ApiResponse::sendResponse(200, 'Course created successfully', $course);
+    }
 
+    // عرض قائمة الكورسات الخاصة بالمدرب
+    public function listCourses(Request $request)
+    {
+        $instructorId = Auth::id();
+        $query = Course::where('user_id', $instructorId);
 
-    // show listcourses//
-    public function listCourses(Request $request){
-        $instructorid=Auth::id();
-        $query=Course::where('user_id',$instructorid);
-
-
-    //search by word//
+        // البحث بالكلمة
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where('title', 'LIKE', "%{$search}%")
-            ->orWhere('description', 'LIKE', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                  ->orWhere('description', 'LIKE', "%{$search}%");
+            });
         }
 
-
-//filter by category//
-            if ($request->has('category_id')) {
+        // فلترة بالتصنيف
+        if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
+
         // فلترة بالتاريخ (من – إلى)
         if ($request->has('from_date') && $request->has('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date]);
-        }
-
-
-             //  الترتيب
+    }
+        // الترتيب
         if ($request->has('sort_by')) {
             $sortBy = $request->sort_by; // price | rating
             $sortOrder = $request->get('sort_order', 'asc'); // asc | desc
@@ -81,7 +78,7 @@ class CourseController extends Controller
         return response()->json($courses);
     }
 
-    //  تعديل الكورس
+    // تعديل الكورس
     public function update(Request $request, $id)
     {
         $course = Course::where('id', $id)
@@ -93,9 +90,13 @@ class CourseController extends Controller
         return ApiResponse::sendResponse(200, 'Course updated successfully', $course);
     }
 
-public function destroy($id)
-{
-    $course = Course::find($id);
+
+    // حذف الكورس
+    public function destroy($id)
+    {
+        $course = Course::where('id', $id)
+                        ->where('user_id', Auth::id())
+                        ->firstOrFail();
 
     if (!$course) {
         return response()->json(['message' => 'Course not found'], 404);
