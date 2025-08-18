@@ -122,18 +122,26 @@ class CheckoutController extends Controller
         $payment->update(['status' => $pi->status, 'response_payload' => $pi->toArray()]);
         $order->update(['status' => $pi->status]);
 
-        $send = $user->notify(new StudentRegisteredNotification([
-            'student_name'  => $user->name,
-            'student_id'    => $user->id,
-            'course_title'  => 'dfdf',
-            'course_id'     => 2,
-        ]));
-        Log::info($send);
+        $orderItems = $order->Items()->with('course.user')->get();
 
+        foreach ($orderItems as $item) {
+            $course   = $item->course;
+            $instructor = $course->user;
+
+            if ($instructor) {
+                $instructor->notify(new StudentRegisteredNotification([
+                    'student_name'  => $user->name,
+                    'student_id'    => $user->id,
+                    'course_title'  => $course->title,
+                    'course_id'     => $course->id,
+                ]));
+            }
+        }
         return response()->json([
             'payment_intent' => $pi->id,
             'status'         => $pi->status,
             'next_action'    => $pi->next_action ?? null,
         ], 200);
+
     }
 }

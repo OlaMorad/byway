@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
             $table->string('video_url')->nullable();
-            $table->enum('status', ["published","unpublished"])->nullable();
+            $table->enum('status', ["published","pending"]);
             $table->decimal('price');
-            $table->foreignId('category_id')->references('id')->on('categories')->nullable();
+            $table->foreignId('category_id')->references('id')->on('categories')->nullable()->onDelete('cascade');
             $table->timestamps();
         });
 
