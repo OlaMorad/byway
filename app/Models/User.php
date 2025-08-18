@@ -9,11 +9,6 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 use App\Notifications\CustomPasswordReset;
-
-use Laravel\Scout\Searchable;
-
-use App\Notifications\CustomPasswordReset;
-
 use Laravel\Scout\Searchable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -29,29 +24,7 @@ class User extends Authenticatable
      * @var list<string>
      */
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'verification_code',
-        'image',
-        'first_name',
-        'last_name',
-        'headline',
-        'about',
-        'twitter_link',
-        'linkedin_link',
-        'youtube_link',
-        'facebook_link',
-        'deletion_requested_at',
-        'deleted_at',
-    ];
-
-
-    protected $casts = [
-        'deletion_requested_at' => 'datetime',
-    ];
+    protected $guarded = ['id'];
 
     /**
      * Send the password reset notification.
@@ -157,6 +130,7 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
 
     public function toSearchableArray()
     {
@@ -167,42 +141,11 @@ class User extends Authenticatable
             'status' => $this->status,
             'nationality' => $this->nationality,
         ];
-    }
-
-
-    public function courses()
-    {
-        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
-    }
-
-    // Check if deletion is pending
-    public function isPendingDeletion()
-    {
-        return $this->status === 'pending_deletion';
-    }
-
-    // Check if within cancellation window (14 days)
-    public function canCancelDeletion()
-    {
-        if (!$this->isPendingDeletion()) return false;
-
-        return $this->deletion_requested_at->addDays(14)->isFuture();
     }
 
     public function orders() {
     return $this->hasMany(Order::class);
 }
-    public function toSearchableArray()
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'status' => $this->status,
-            'nationality' => $this->nationality,
-        ];
-    }
-
 
     public function courses()
     {
@@ -226,5 +169,6 @@ class User extends Authenticatable
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class, 'learner_id');
+
     }
 }

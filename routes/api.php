@@ -1,8 +1,6 @@
 <?php
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\TeacherProfileController;
-use App\Http\Controllers\CourseController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,14 +15,11 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\ProfileController;
 
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\ProfileController;
-
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
@@ -34,7 +29,7 @@ use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
 
 use App\Http\Controllers\Api\Learner\CourseProgressController;
-
+use App\Http\Controllers\Api\PlatformSettingsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -103,21 +98,38 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
     Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
 });
-
-
+Route::post('/instructors', [UserManagementController::class, 'addInstructor']);
+Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']);
 Route::get('/courses', [CourseManagementController::class, 'index']);
+Route::get('/courses/{id}', [CourseController::class, 'show']);
 Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);
 Route::delete('/courses/{courseId}', [CourseManagementController::class, 'destroy']);
 Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);
 Route::delete('/courses/{courseId}', [CourseManagementController::class, 'destroy']);
 Route::patch('/courses/approve/{id}', [CourseManagementController::class, 'approve']);
+Route::get('/courses/search', [CourseManagementController::class, 'search']);
 Route::get('/instructors', [UserManagementController::class, 'allInstructors']);
 Route::prefix('reviews')->group(function () {
     Route::get('/', [ReviewManagementController::class, 'index']);       // عرض كل الريفيوهات
     Route::get('/{id}', [ReviewManagementController::class, 'show']);   // عرض ريفيو واحد
     Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
+    Route::get('/search', [ReviewManagementController::class, 'search']); // بحث عن ريفيو
+});
+Route::prefix('categories')->group(function () {
+    Route::get('/', [PlatformSettingsController::class, 'index']);        // جلب كل الكاتيجوريز
+    Route::post('/', [PlatformSettingsController::class, 'store']);       // إضافة كاتيجوري جديدة
+    Route::put('/{id}', [PlatformSettingsController::class, 'update']);  // تعديل اسم الكاتيجوري
+    Route::delete('/{id}', [PlatformSettingsController::class, 'destroy']); // حذف كاتيجوري
+});
+Route::prefix('settings')->group(function () {
+    Route::get('/', [PlatformSettingsController::class, 'showSettings']);  // عرض الإعدادات
+    Route::put('/', [PlatformSettingsController::class, 'editSettings']);  // تعديل الإعدادات
 });
 
+Route::prefix('reports')->group(function () {
+    Route::get('/', [ReportsController::class, 'generalStatistics']);
+    Route::get('/courses', [ReportsController::class, 'coursesAvgRating']);
+});
 
 Route::middleware('auth:sanctum')->controller(CartController::class)->group(function () {
     // Cart
@@ -140,7 +152,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post  ('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
     Route::post  ('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
     Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
-    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']); 
+    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']);
 });
 
 

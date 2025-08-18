@@ -23,7 +23,7 @@ class CourseFactory extends Factory
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
             'video_url' => $this->faker->url,
-            'status' => $this->faker->randomElement(['published', 'unpublished']),
+            'status' => $this->faker->randomElement(['published', 'pending']),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'category_id' =>  Category::inRandomOrder()->first()->id,
         ];
