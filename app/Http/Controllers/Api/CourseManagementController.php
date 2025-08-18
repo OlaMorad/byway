@@ -12,9 +12,12 @@ class CourseManagementController extends Controller
         protected CourseManagementServices $courseManagementServices
     ) {}
     //  عرض كل الكورسات
-    public function index()
+    public function index(Request $request)
     {
-        return $this->courseManagementServices->getAllCourses();
+        // جمع الفلاتر من الريكوست
+        $filters = $request->only(['category_id', 'status']);
+
+        return $this->courseManagementServices->getAllCourses($filters);
     }
     // حذف كورس
     public function destroy($courseId)
@@ -39,5 +42,16 @@ class CourseManagementController extends Controller
         ]);
 
         return $this->courseManagementServices->updateCourse($courseId, $validated);
+    }
+    // عرض كورس محدد
+    public function show($courseId)
+    {
+        return $this->courseManagementServices->getCourseById($courseId);
+    }
+    // البحث عن كورس
+    public function search(Request $request)
+    {
+        $filters = $request->query('key');
+        return $this->courseManagementServices->searchCourses($filters);
     }
 }
