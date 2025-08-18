@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory,Searchable;
 
     protected $fillable = [
         'title',
@@ -55,5 +56,17 @@ class Course extends Model
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');
+    }
+    public function toSearchableArray()
+    {
+        $array = [
+            'id'             => $this->id,
+            'title'          => $this->title,
+            'instructor_name' => $this->user?->name,
+            'category_name'  => $this->category?->name,
+            'status'         => $this->status,
+        ];
+
+        return $array;
     }
 }

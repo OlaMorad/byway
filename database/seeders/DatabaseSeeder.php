@@ -27,13 +27,7 @@ class DatabaseSeeder extends Seeder
             'role' => 'admin',
             'status' => 'Active',
         ]);
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('12345678'),
-            'role' => 'admin',
-            'status' => 'Active',
-        ]);
+
         User::factory(10)->sequence(['role' => 'learner'], ['role' => 'instructor'])->create();
         $this->call([
             CategorySeeder::class,
