@@ -9,7 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
-{public function store(Request $request)
+
+{
+
+
+    public function store(Request $request)
 {
     $validatecourses = $request->validate([
         'title'       => 'required|string|max:255',
@@ -20,15 +24,12 @@ class CourseController extends Controller
         'category_id' => 'required|exists:categories,id'
     ]);
 
-    // رفع الفيديو على Cloudinary
-    $uploadedFileUrl = Cloudinary::upload(
-        $request->file('video')->getRealPath(),
-        [
-            'folder'        => 'courses_videos',
-            'resource_type' => 'video'
-        ]
-    )->getSecurePath();
 
+        // لو فيه فيديو يترفع
+        $videoPath = null;
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('videos', 'public');
+        }
     // تخزين بيانات الكورس
     $course = Course::create([
         'user_id'     => auth()->id(),
@@ -37,7 +38,7 @@ class CourseController extends Controller
         'price'       => $request->price,
         'category_id' => $request->category_id,
         'status'      => $request->status,
-        'video_url'   => $uploadedFileUrl, // اللينك من Cloudinary
+        'video_url'=>$videoPath
     ]);
 
     return ApiResponse::sendResponse(200, 'Course created successfully', $course);
@@ -62,10 +63,9 @@ class CourseController extends Controller
             if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
-//filter by date//
-
-    if ($request->has('date')) {
-        $query->whereDate('created_at', $request->date);
+        // فلترة بالتاريخ (من – إلى)
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $query->whereBetween('created_at', [$request->from_date, $request->to_date]);
         }
 
 
@@ -93,15 +93,33 @@ class CourseController extends Controller
         return ApiResponse::sendResponse(200, 'Course updated successfully', $course);
     }
 
-    //  حذف الكورس
-    public function destroy($id)
-    {
-        $course = Course::where('id', $id)
-                        ->where('user_id', Auth::id())
-                        ->firstOrFail();
+public function destroy($id)
+{
+    $course = Course::find($id);
 
-        $course->delete();
-
-        return ApiResponse::sendResponse(200, 'Course deleted successfully', $course);
+    if (!$course) {
+        return response()->json(['message' => 'Course not found'], 404);
     }
+
+    // التأكد إن اللي عامل auth هو صاحب الكورس
+
+    if ($course->user_id !== auth()->id()) {
+        return ApiResponse::sendResponse(
+            403,
+            'You are not the instructor of this course, so you cannot delete it.'
+        );
+    }
+
+    // حذف الـ reviews المرتبطة
+    if ($course->reviews()->count() > 0) {
+        $course->reviews()->delete();
+    }
+
+    $course->delete();
+    return ApiResponse::sendResponse(200, 'Course and its lessons deleted successfully', $course);
+
+}
+
+
+
 }

@@ -51,13 +51,15 @@ Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
 
 
 //store course//
+Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses', [CourseController::class, 'store']);
+});
 
 
 
 
 
-    
+
 Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
 Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
 
@@ -78,7 +80,10 @@ Route::prefix('reviews')->group(function () {
 });
 
 
-//manage course
+//manage courseuse App\Http\Controllers\CourseController;
+
+Route::middleware('auth:sanctum','role:instructor')->group(function () {
     Route::get('/instructor/courses', [CourseController::class, 'listCourses']);
     Route::put('/instructor/courses/{id}', [CourseController::class, 'update']);
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy']);
+});

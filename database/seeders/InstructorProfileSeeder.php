@@ -21,14 +21,14 @@ class InstructorProfileSeeder extends Seeder
 
         InstructorProfile::create([
             'user_id'        => $user->id,
-            'name'           => $user->name,
+            // 'name'           => $user->name,
             'bio'            => 'This is a sample instructor bio.',
             'total_earnings' => 1200.50,
             'twitter_link'   => 'https://twitter.com/test',
             'linkdin_link'   => 'https://linkedin.com/in/test',
             'youtube_link'   => 'https://youtube.com/@test',
             'facebook_link'  => 'https://facebook.com/test',
-            'image'          => null,
+            // 'image'          => null,
         ]);
     }
 }
