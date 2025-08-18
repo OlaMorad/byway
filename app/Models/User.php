@@ -7,11 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-
-use App\Notifications\CustomPasswordReset;
-
-use Laravel\Scout\Searchable;
-
 use App\Notifications\CustomPasswordReset;
 
 use Laravel\Scout\Searchable;
@@ -21,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens , Searchable ,  SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -49,9 +44,6 @@ class User extends Authenticatable
     ];
 
 
-    protected $casts = [
-        'deletion_requested_at' => 'datetime',
-    ];
 
     /**
      * Send the password reset notification.
@@ -85,13 +77,6 @@ class User extends Authenticatable
         return $value ?? 'https://www.facebook.com';
     }
 
-    /*protected $guarded = [
-
-    protected $guarded = [
-
-
-        'id'
-    ];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -128,6 +113,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'created_at' => 'datetime',
+             'deletion_requested_at' => 'datetime',
         ];
     }
 
@@ -158,22 +144,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Cart::class);
 
-    public function toSearchableArray()
-    {
-        return [
-            'name' => $this->name,
-            'email' => $this->email,
-            'role' => $this->role,
-            'status' => $this->status,
-            'nationality' => $this->nationality,
-        ];
     }
 
 
-    public function courses()
-    {
-        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
-    }
 
     // Check if deletion is pending
     public function isPendingDeletion()
@@ -209,19 +182,6 @@ class User extends Authenticatable
         return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
     }
 
-    // Check if deletion is pending
-    public function isPendingDeletion()
-    {
-        return $this->status === 'pending_deletion';
-    }
-
-    // Check if within cancellation window (14 days)
-    public function canCancelDeletion()
-    {
-        if (!$this->isPendingDeletion()) return false;
-
-        return $this->deletion_requested_at->addDays(14)->isFuture();
-    }
 
     public function enrollments()
     {
