@@ -14,7 +14,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\ProfileController;
-
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
@@ -24,10 +23,8 @@ use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\CourseShowController;
-
 use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
-
 use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 
@@ -68,13 +65,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
 });
 
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
-});
 
 Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
 Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
@@ -84,51 +75,97 @@ Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
 //store course//
     Route::post('/courses', [CourseController::class, 'store']);
 
-Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
-Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
-
+// Admin
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-    Route::get('/users', [UserManagementController::class, 'index']);   // عرض جميع المستخدمين
-    Route::get('/users/search', [UserManagementController::class, 'searchUsers']);
-    Route::get('/users/search', [UserManagementController::class, 'searchUsers']);
-    Route::get('/users/{id}', [UserManagementController::class, 'show']);         // عرض بروفايل مستخدم
-    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
-    Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
-    Route::patch('/users/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);    // تغيير حالة الحساب
-    Route::patch('/users/{userId}', [UserManagementController::class, 'updateUser']);
-    Route::delete('/users/{id}', [UserManagementController::class, 'destroy']); // حذف حساب
-});
-Route::post('/instructors', [UserManagementController::class, 'addInstructor']);
-Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']);
-Route::get('/courses', [CourseManagementController::class, 'index']);
-Route::get('/courses/{id}', [CourseController::class, 'show']);
-Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);
-Route::delete('/courses/{courseId}', [CourseManagementController::class, 'destroy']);
-Route::put('/courses/{courseId}', [CourseManagementController::class, 'update']);
-Route::delete('/courses/{courseId}', [CourseManagementController::class, 'destroy']);
-Route::patch('/courses/approve/{id}', [CourseManagementController::class, 'approve']);
-Route::get('/courses/search', [CourseManagementController::class, 'search']);
-Route::get('/instructors', [UserManagementController::class, 'allInstructors']);
-Route::prefix('reviews')->group(function () {
-    Route::get('/', [ReviewManagementController::class, 'index']);       // عرض كل الريفيوهات
-    Route::get('/{id}', [ReviewManagementController::class, 'show']);   // عرض ريفيو واحد
-    Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
-    Route::get('/search', [ReviewManagementController::class, 'search']); // بحث عن ريفيو
-});
-Route::prefix('categories')->group(function () {
-    Route::get('/', [PlatformSettingsController::class, 'index']);        // جلب كل الكاتيجوريز
-    Route::post('/', [PlatformSettingsController::class, 'store']);       // إضافة كاتيجوري جديدة
-    Route::put('/{id}', [PlatformSettingsController::class, 'update']);  // تعديل اسم الكاتيجوري
-    Route::delete('/{id}', [PlatformSettingsController::class, 'destroy']); // حذف كاتيجوري
-});
-Route::prefix('settings')->group(function () {
-    Route::get('/', [PlatformSettingsController::class, 'showSettings']);  // عرض الإعدادات
-    Route::put('/', [PlatformSettingsController::class, 'editSettings']);  // تعديل الإعدادات
-});
 
-Route::prefix('reports')->group(function () {
-    Route::get('/', [ReportsController::class, 'generalStatistics']);
-    Route::get('/courses', [ReportsController::class, 'coursesAvgRating']);
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']); // إحصائيات عامة للوحة التحكم
+    Route::get('dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']); // أفضل الكورسات تقييمًا
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Management Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index']);                // عرض جميع المستخدمين
+        Route::get('/search', [UserManagementController::class, 'searchUsers']);   // البحث عن مستخدمين
+        Route::get('/{id}', [UserManagementController::class, 'show']);            // عرض بروفايل مستخدم محدد
+        Route::patch('/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']); // تغيير حالة الحساب
+        Route::patch('/{userId}', [UserManagementController::class, 'updateUser']); // تعديل بيانات المستخدم
+        Route::delete('/{id}', [UserManagementController::class, 'destroy']);       // حذف مستخدم
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Instructors Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/instructors', [UserManagementController::class, 'allInstructors']); // عرض كل المعلمين
+    Route::post('/instructors', [UserManagementController::class, 'addInstructor']); // إضافة معلم جديد
+    Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']); // تعديل بيانات المعلم
+
+    /*
+    |--------------------------------------------------------------------------
+    | Courses Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('courses')->group(function () {
+        Route::get('/', [CourseManagementController::class, 'index']);             // عرض كل الكورسات
+        Route::get('/{id}', [CourseController::class, 'show']);                     // عرض كورس محدد
+        Route::put('/{courseId}', [CourseManagementController::class, 'update']);   // تعديل كورس
+        Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']); // حذف كورس
+        Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']); // اعتماد كورس
+        Route::get('/search', [CourseManagementController::class, 'search']);      // البحث عن كورس
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reviews Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('reviews')->group(function () {
+        Route::get('/', [ReviewManagementController::class, 'index']);          // عرض كل الريفيوهات
+        Route::get('/{id}', [ReviewManagementController::class, 'show']);      // عرض ريفيو محدد
+        Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
+        Route::get('/search', [ReviewManagementController::class, 'search']);   // البحث عن ريفيو
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Categories Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('categories')->group(function () {
+        Route::get('/', [PlatformSettingsController::class, 'index']);        // جلب كل الكاتيجوريز
+        Route::post('/', [PlatformSettingsController::class, 'store']);       // إضافة كاتيجوري جديدة
+        Route::put('/{id}', [PlatformSettingsController::class, 'update']);   // تعديل اسم الكاتيجوري
+        Route::delete('/{id}', [PlatformSettingsController::class, 'destroy']); // حذف كاتيجوري
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Platform Settings Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [PlatformSettingsController::class, 'showSettings']);  // عرض الإعدادات
+        Route::put('/', [PlatformSettingsController::class, 'editSettings']);  // تعديل الإعدادات
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reports Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('reports')->group(function () {
+        Route::get('/', [ReportsController::class, 'generalStatistics']);     // الإحصائيات العامة
+        Route::get('/courses', [ReportsController::class, 'coursesAvgRating']); // متوسط تقييم الكورسات
+    });
 });
 
 Route::middleware('auth:sanctum')->controller(CartController::class)->group(function () {
