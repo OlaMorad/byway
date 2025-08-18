@@ -1,8 +1,6 @@
 <?php
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\TeacherProfileController;
-use App\Http\Controllers\CourseController;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,11 +14,6 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Api\ProfileController;
-
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\ProfileController;
-
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
@@ -29,10 +22,8 @@ use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\CourseShowController;
-
 use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
-
 use App\Http\Controllers\Api\Learner\CourseProgressController;
 
 
@@ -73,13 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
 });
 
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
-});
 
 Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
 Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
