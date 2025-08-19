@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Models\Setting;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WithdrawalRequest extends FormRequest
@@ -21,12 +22,16 @@ class WithdrawalRequest extends FormRequest
      */
     public function rules(): array
     {
+        $minWithdrawal = Setting::value('withdrawal') ?? 50.00;
+
+       
         return [
-            'payment_method' => 'required|string', 
+            'payment_method' => 'required|string',
             'account_name'   => 'required|string|min:3|max:100',
             'account_number' => 'required|numeric',
             'bank_name'      => 'required|string|min:3|max:100',
-            'amount'         => 'required|numeric|min:50',
+            'amount' => "required|numeric|min:{$minWithdrawal}",
+
 
         ];
     }

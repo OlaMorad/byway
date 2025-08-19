@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Payment;
+use App\Models\Setting;
 use App\Models\OrderItem;
+use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\WithdrawalRequest;
@@ -19,7 +21,8 @@ class WithdrawalController extends Controller
         $q->where('user_id', $user->id);
     })->sum('price');
 
-    $netProfits = $totalProfits * 0.85;
+    $commission = Setting::value('commission') ?? 15.00;   
+    $netProfits = $totalProfits * ((100 - $commission) / 100);
 
     $withdrawals = Payment::where('user_id', $user->id)
         ->where('type', 'withdrawal')
@@ -41,11 +44,8 @@ class WithdrawalController extends Controller
         'response_payload' => json_encode($dataValidated),
     ]);
 
-    return response()->json([
-        'message'    => 'Withdrawal request submitted successfully',
-        'request_id' => $payment->id,
-        'response_payload' => $payment->response_payload,
-    ]);
+
+    return ApiResponse::sendResponse(200, 'Withdrawal request submitted successfully');
 }
 
 }
