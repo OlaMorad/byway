@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
@@ -18,4 +19,5 @@ class Payment extends Model
     {
         return $this->hasOne(Order::class);
     }
+
 }
