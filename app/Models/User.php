@@ -7,16 +7,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
 use App\Notifications\CustomPasswordReset;
 
 use Laravel\Scout\Searchable;
+
+
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens , Searchable ,  SoftDeletes;
+    use HasFactory, Notifiable, HasApiTokens, Searchable,  SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,26 +27,7 @@ class User extends Authenticatable
      * @var list<string>
      */
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'verification_code',
-        'image',
-        'first_name',
-        'last_name',
-        'headline',
-        'about',
-        'twitter_link',
-        'linkedin_link',
-        'youtube_link',
-        'facebook_link',
-        'deletion_requested_at',
-        'deleted_at',
-    ];
-
-
+    protected $guarded = ['id'];
 
     /**
      * Send the password reset notification.
@@ -113,7 +97,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'created_at' => 'datetime',
-             'deletion_requested_at' => 'datetime',
+            'deletion_requested_at' => 'datetime',
         ];
     }
 
@@ -126,7 +110,6 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
     }
-
 
 
     public function paymentMethods()
@@ -143,9 +126,10 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
-
     }
 
+
+    
 
 
     // Check if deletion is pending
@@ -153,6 +137,7 @@ class User extends Authenticatable
     {
         return $this->status === 'pending_deletion';
     }
+
 
     // Check if within cancellation window (14 days)
     public function canCancelDeletion()
@@ -162,9 +147,10 @@ class User extends Authenticatable
         return $this->deletion_requested_at->addDays(14)->isFuture();
     }
 
-    public function orders() {
-    return $this->hasMany(Order::class);
-}
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
     public function toSearchableArray()
     {
         return [
@@ -176,11 +162,13 @@ class User extends Authenticatable
         ];
     }
 
-
     public function courses()
     {
         return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
     }
+
+
+
 
 
     public function enrollments()

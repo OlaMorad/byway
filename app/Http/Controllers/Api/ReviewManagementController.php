@@ -12,9 +12,10 @@ class ReviewManagementController extends Controller
         protected ReviewManagementServices $reviewService
     ) {}
     // كل الريفيوهات
-    public function index()
+    public function index(Request $request)
     {
-        return $this->reviewService->getAllReview();
+        $instructorId = $request->query('instructor_id');
+        return $this->reviewService->getAllReview($instructorId);
     }
 
     // عرض ريفيو واحد
@@ -28,4 +29,5 @@ class ReviewManagementController extends Controller
     {
         return $this->reviewService->deleteReview($id);
     }
+
 }
