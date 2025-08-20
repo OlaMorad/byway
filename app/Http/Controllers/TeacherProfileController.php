@@ -89,11 +89,9 @@ $user = auth()->user();
     {
         $validated = $request->validate([
             'bio'            => 'required|string|max:1000',
-            'name'           => 'required|string|max:255',
             'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'twitter_link'   => 'nullable|url',
-            'linkedin_link'  => 'nullable|url',
-            'youtube_link'   => 'nullable|url',
+            'google_link'  => 'nullable|url',
+            'github_link'   => 'nullable|url',
             'facebook_link'  => 'nullable|url'
         ]);
 

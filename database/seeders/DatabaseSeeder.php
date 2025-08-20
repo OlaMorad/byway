@@ -20,13 +20,49 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('12345678'),
-            'role' => 'admin',
-            'status' => 'Active',
-        ]);
+        $users = [
+            [
+                'name' => 'Admin',
+                'email' => 'admin@gmail.com',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Admin',
+                'email' => 'admin1@gmail.com',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Admin',
+                'email' => 'admin2@gmail.com',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Admin',
+                'email' => 'admin3@gmail.com',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Admin',
+                'email' => 'admin4@gmail.com',
+                'role' => 'admin',
+            ],
+            [
+                'name' => 'Admin',
+                'email' => 'admin5@gmail.com',
+                'role' => 'admin',
+            ],
+
+        ];
+
+        foreach ($users as $user) {
+            User::create([
+                'name' => $user['name'],
+                'email' => $user['email'],
+                'password' => Hash::make('12345678'),
+                'role' => $user['role'],
+                'status' => 'Active',
+            ]);
+        }
 
         User::factory(10)->sequence(['role' => 'learner'], ['role' => 'instructor'])->create();
         $this->call([
@@ -36,12 +72,12 @@ class DatabaseSeeder extends Seeder
         Lesson::factory(50)->create();
         Review::factory(50)->create();
 
-    $this->call([
-      InstructorProfileSeeder::class,
-        UserSeeder::class,
-        PaymentSeeder::class,
-        CourseSeeder::class,
-        FavoritesCartSeeder::class,
-    ]);
+        $this->call([
+            InstructorProfileSeeder::class,
+            UserSeeder::class,
+            PaymentSeeder::class,
+            CourseSeeder::class,
+            FavoritesCartSeeder::class,
+        ]);
     }
 }
