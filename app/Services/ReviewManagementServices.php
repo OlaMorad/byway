@@ -21,6 +21,7 @@ class ReviewManagementServices
 
         $reviews = $reviewsQuery->get()->map(function ($review) {
             return [
+                'id'          => $review->id,
                 'course_name' => $review->course->title ?? null,
                 'reviewer'    => $review->user->name ?? null,
                 'rating'      => $review->rating,

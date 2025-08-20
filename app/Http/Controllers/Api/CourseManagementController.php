@@ -38,7 +38,7 @@ class CourseManagementController extends Controller
             'price'       => 'sometimes|numeric|min:0',
             'category_id' => 'sometimes|exists:categories,id',
             'video_url'   => 'sometimes|url',
-            'status'      => 'sometimes|in:published,unpublished',
+            'status'      => 'sometimes|in:published,pending',
         ]);
 
         return $this->courseManagementServices->updateCourse($courseId, $validated);
