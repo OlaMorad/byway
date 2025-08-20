@@ -17,10 +17,19 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|string|in:learner,teacher',
+            'first_name' =>  'required|string',
+            'last_name' => 'required|string',
+            'headline' => ['nullable', 'string', 'max:100'],
+            'about' => ['nullable', 'string', 'max:500'],
+            'twitter_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?twitter\.com\/[a-zA-Z0-9_]+\/?$/'],
+            'linkedin_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/'],
+            'youtube_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?youtube\.com\/(channel\/|user\/|c\/)?[a-zA-Z0-9_-]+\/?$/'],
+            'facebook_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9\.]+\/?$/'],
+            'image' => 'nullable|string|max:65535',
         ]);
 
         // Generate 6-digit verification code
@@ -31,6 +40,15 @@ class RegisterController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'image' => $request->image,
+            'headline' => $request->headline,
+            'about' => $request->about,
+            'twitter_link' => trim($request->twitter_link),
+            'linkedin_link' => trim($request->linkedin_link),
+            'youtube_link' => trim($request->youtube_link),
+            'facebook_link' => trim($request->facebook_link),
             'verification_code' => $code,
             'is_verified' => false,
         ]);
@@ -38,11 +56,20 @@ class RegisterController extends Controller
         // Send verification email
         $this->sendVerificationEmail($user);
 
-        return ApiResponse::sendResponse(201, 'Registration successful. Check your email for the verification code.', [
+        return ApiResponse::sendResponse(201, "Registration successful. Check your email for the verification code.->$code", [
             'user_id' => $user->id,
-            'name'=>$user->name,
+            'name' => $user->name,
             'role' => $user->role,
             'email' => $user->email,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'image' => $user->image,
+            'headline' => $user->headline,
+            'about' => $user->about,
+            'twitter_link' => trim($request->twitter_link),
+            'linkedin_link' => trim($request->linkedin_link),
+            'youtube_link' => trim($request->youtube_link),
+            'facebook_link' => trim($request->facebook_link),
             'token' => $user->createToken('auth_token')->plainTextToken,
         ]);
     }

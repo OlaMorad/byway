@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use App\Helpers\ApiResponse;
+
+
 use App\Models\Course;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Helpers\ApiResponse;
@@ -42,6 +47,7 @@ class CourseController extends Controller
         return ApiResponse::sendResponse(200, 'Course created successfully', $course);
     }
 
+
     // عرض قائمة الكورسات الخاصة بالمدرب
     public function listCourses(Request $request)
     {
@@ -65,7 +71,7 @@ class CourseController extends Controller
         // فلترة بالتاريخ (من – إلى)
         if ($request->has('from_date') && $request->has('to_date')) {
             $query->whereBetween('created_at', [$request->from_date, $request->to_date]);
-    }
+        }
         // الترتيب
         if ($request->has('sort_by')) {
             $sortBy = $request->sort_by; // price | rating

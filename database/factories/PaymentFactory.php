@@ -1,0 +1,31 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Payment>
+ */
+class PaymentFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'stripe_payment_intent_id' => $this->faker->uuid(),
+            'status' => $this->faker->randomElement(['pending', 'succeeded', 'failed']),
+            'amount' => $this->faker->randomFloat(2, 0, 10000), // بين 0 و 10,000 فقط
+            'currency' => 'usd',
+            'response_payload' => null,
+            'created_at' => $this->faker->dateTimeBetween('2022-01-01', '2025-12-31'),
+            'updated_at' => now(),
+        ];
+    }
+}

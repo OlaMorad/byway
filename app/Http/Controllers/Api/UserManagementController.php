@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\AddInstructorRequest;
+use App\Http\Requests\Api\UpdateInstructorRequest;
 use App\Services\UserManagementServices;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -23,7 +25,7 @@ class UserManagementController extends Controller
     {
         return $this->userManagementServices->userProfile($id);
     }
-
+    // تغيير حالة الحساب
     public function toggleStatus($id)
     {
         return $this->userManagementServices->toggleUserStatus($id);
@@ -39,7 +41,7 @@ class UserManagementController extends Controller
         $key = $request->query('key');
         return $this->userManagementServices->searchUsers($key);
     }
-
+    // تعديل المستخدم
     public function updateUser(Request $request, $userId)
     {
         $validated = $request->validate([
@@ -53,5 +55,22 @@ class UserManagementController extends Controller
     public function allInstructors()
     {
         return $this->userManagementServices->allInstructors();
+    }
+    // اضافة استاذ
+    public function addInstructor(AddInstructorRequest $request)
+    {
+        $data = $request->validated();
+        return $this->userManagementServices->addInstructor($data);
+    }
+    // تعديل معلومات استاذ
+    public function updateInstructorProfile(UpdateInstructorRequest $request, $id)
+    {
+        return $this->userManagementServices->updateInstructor($request->validated(), $id);
+    }
+    // بحث
+    public function searchInstructors(Request $request)
+    {
+        $key = $request->query('key');
+        return $this->userManagementServices->searchInstructors($key);
     }
 }

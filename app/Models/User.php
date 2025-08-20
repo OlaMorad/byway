@@ -7,21 +7,60 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
+use App\Notifications\CustomPasswordReset;
+
 use Laravel\Scout\Searchable;
+
+
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, Searchable;
+    use HasFactory, Notifiable, HasApiTokens, Searchable,  SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
-    protected $guarded = [
-        'id'
-    ];
+
+    protected $guarded = ['id'];
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new CustomPasswordReset($token));
+    }
+
+    // Accessors for links
+    public function getTwitterLinkAttribute($value)
+    {
+        return $value ?? 'https://twitter.com';
+    }
+
+    public function getLinkedInLinkAttribute($value)
+    {
+        return $value ?? 'https://www.linkedin.com';
+    }
+
+    public function getYoutubeLinkAttribute($value)
+    {
+        return $value ?? 'https://www.youtube.com';
+    }
+
+    public function getFacebookLinkAttribute($value)
+    {
+        return $value ?? 'https://www.facebook.com';
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -58,6 +97,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'created_at' => 'datetime',
+            'deletion_requested_at' => 'datetime',
         ];
     }
 
@@ -70,10 +110,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
     }
-    public function courses()
-    {
-        return $this->hasMany(Course::class);
-    }
+
 
     public function paymentMethods()
     {
@@ -85,6 +122,35 @@ class User extends Authenticatable
         return $this->hasOne(InstructorProfile::class, 'user_id');
     }
 
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
+
+
+    
+
+
+    // Check if deletion is pending
+    public function isPendingDeletion()
+    {
+        return $this->status === 'pending_deletion';
+    }
+
+
+    // Check if within cancellation window (14 days)
+    public function canCancelDeletion()
+    {
+        if (!$this->isPendingDeletion()) return false;
+
+        return $this->deletion_requested_at->addDays(14)->isFuture();
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
     public function toSearchableArray()
     {
         return [
@@ -94,5 +160,19 @@ class User extends Authenticatable
             'status' => $this->status,
             'nationality' => $this->nationality,
         ];
+    }
+
+    public function courses()
+    {
+        return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
+    }
+
+
+
+
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class, 'learner_id');
     }
 }
