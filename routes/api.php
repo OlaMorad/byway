@@ -37,10 +37,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
-    Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
-});
+
 
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-code', [RegisterController::class, 'verifyCode']);
@@ -180,13 +177,16 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
 });
 
 // payment
- Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
- Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
- Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
 
- Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
+    Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
+    Route::post('/checkout',   [CheckoutController::class, 'checkout']);
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM']);
+    Route::get('/payment-history', PaymentHistoryController::class);
     Route::post('/instructor/withdrawals/request', [WithdrawalController::class, 'requestWithdrawal']);
 });
+
 
 
 

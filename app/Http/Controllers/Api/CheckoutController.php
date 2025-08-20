@@ -137,11 +137,6 @@ class CheckoutController extends Controller
                 ]));
             }
         }
-        return response()->json([
-            'payment_intent' => $pi->id,
-            'status'         => $pi->status,
-            'next_action'    => $pi->next_action ?? null,
-        ], 200);
-
+        return ApiResponse::sendResponse(200 , 'Payment Intent Confirmed Successfully');
     }
 }

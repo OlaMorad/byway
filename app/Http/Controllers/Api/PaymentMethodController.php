@@ -60,15 +60,13 @@ class PaymentMethodController extends Controller
         Stripe::setApiKey(config('services.stripe.secret'));
         $user = $request->user();
 
-        // جلب الـ PaymentMethod من Stripe
+       
         $pm = StripePaymentMethod::retrieve($request->payment_method);
 
-        // attach لو مش attach
         if (empty($pm->customer)) {
             $pm->attach(['customer' => $user->stripe_customer_id]);
         }
 
-        // خزن السجل محلياً (billing_details مش حساسة هنا)
         $record = PaymentMethod::create([
             'user_id' => $user->id,
             'stripe_pm_id' => $pm->id,
@@ -77,29 +75,10 @@ class PaymentMethodController extends Controller
             'billing_details' => $pm->billing_details ? (array)$pm->billing_details : null,
 
         ]);
-
-        return response()->json([
-            'status' => 'success',
-            'payment_method' => $record,
-        ], 201);
+        return ApiResponse::sendResponse(201, 'Payment method added successfully', $record);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-       
-    }
-
+  
     /**
      * Remove the specified resource from storage.
      */
