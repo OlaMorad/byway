@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Helpers\ApiResponse;
 
 
 use App\Models\Course;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use App\Helpers\ApiResponse;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
