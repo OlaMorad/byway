@@ -58,7 +58,13 @@ class UserManagementServices
     // حذف حساب اليوزر
     public function deleteUser($userId)
     {
-        User::findOrFail($userId)->delete();
+        $user = User::find($userId);
+
+        if (!$user) {
+            return ApiResponse::sendResponse(404, 'User not found');
+        }
+
+        $user->delete();
         return ApiResponse::sendResponse(200, 'User account deleted successfully');
     }
     // البحث عن اليوزر
@@ -70,19 +76,24 @@ class UserManagementServices
 
         $users = User::search($key)->get();
 
-        $filteredUsers = $users->where('role', '!=', 'admin')
-            ->map(function ($user) {
-                return [
-                    'id'          => $user->id,
-                    'name'        => $user->name,
-                    'email'       => $user->email,
-                    'image'       => $user->image,
-                    'role'        => $user->role,
-                    'status'      => $user->status,
-                    'nationality' => $user->nationality,
-                    'created_at'  => $user->created_at,
-                ];
-            })->values();
+        $filteredUsers = $users->where('role', '!=', 'admin');
+        
+        if (in_array(strtolower($key), ['learner', 'instructor'])) {
+            $filteredUsers = $filteredUsers->where('role', strtolower($key));
+        }
+
+        $filteredUsers = $filteredUsers->map(function ($user) {
+            return [
+                'id'          => $user->id,
+                'name'        => $user->name,
+                'email'       => $user->email,
+                'image'       => $user->image,
+                'role'        => $user->role,
+                'status'      => $user->status,
+                'nationality' => $user->nationality,
+                'created_at'  => $user->created_at,
+            ];
+        })->values();
 
         return ApiResponse::sendResponse(200, 'Users search results retrieved successfully', $filteredUsers);
     }
@@ -157,6 +168,9 @@ class UserManagementServices
     {
         $user = User::with('instructorProfile')->findOrFail($id);
 
+        if (!$user || $user->role !== 'instructor') {
+            return ApiResponse::sendResponse(404, 'Instructor not found');
+        }
         // تعديل على جدول users
         if (isset($data['name'])) {
             $user->name = $data['name'];

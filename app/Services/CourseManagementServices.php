@@ -44,7 +44,11 @@ class CourseManagementServices
     // الموافقة على كورس
     public function approveCourse($courseId)
     {
-        $course = Course::findOrFail($courseId);
+        $course = Course::find($courseId);
+
+        if (!$course) {
+            return ApiResponse::sendResponse(404, 'Course not found');
+        }
 
         if ($course->status === 'published') {
             return ApiResponse::sendResponse(200, 'Course is already published');
@@ -59,7 +63,13 @@ class CourseManagementServices
     // حذف كورس
     public function deleteCourse($courseId)
     {
-        Course::where('id', $courseId)->delete();
+        $course = Course::find($courseId);
+
+        if (!$course) {
+            return ApiResponse::sendResponse(404, 'Course not found');
+        }
+
+        $course->delete();
         return ApiResponse::sendResponse(200, 'Course deleted successfully');
     }
 

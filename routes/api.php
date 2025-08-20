@@ -1,4 +1,5 @@
 <?php
+
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 
@@ -34,7 +35,7 @@ Route::get('/user', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('payment-methods/setup-intent' , [PaymentMethodController::class, 'createSetupIntent']);
+    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
     Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
 });
 
@@ -67,13 +68,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-Route::get('/teacher/profile', [TeacherProfileController::class,'show']);
+Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
 Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
 Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
 
 
 //store course//
-    Route::post('/courses', [CourseController::class, 'store']);
+Route::post('/courses', [CourseController::class, 'store']);
 
 // Admin
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
@@ -83,9 +84,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     | Dashboard Routes
     |--------------------------------------------------------------------------
     */
-    Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']); // إحصائيات عامة للوحة التحكم
-    Route::get('dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']); // أفضل الكورسات تقييمًا
-
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/statistics', [DashboardController::class, 'getDashboardStatistics']);
+        Route::get('/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
+        Route::get('/recent-payments', [DashboardController::class, 'getRecentPayments']);
+        Route::get('/revenue-report', [DashboardController::class, 'getRevenueReport']);      // تقرير الإيرادات حسب السنة والشهر
+    });
     /*
     |--------------------------------------------------------------------------
     | User Management Routes
@@ -108,6 +112,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/instructors', [UserManagementController::class, 'allInstructors']); // عرض كل المعلمين
     Route::post('/instructors', [UserManagementController::class, 'addInstructor']); // إضافة معلم جديد
     Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']); // تعديل بيانات المعلم
+    Route::get('/instructors/search', [UserManagementController::class, 'searchInstructors']);
 
     /*
     |--------------------------------------------------------------------------
@@ -165,6 +170,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::prefix('reports')->group(function () {
         Route::get('/', [ReportsController::class, 'generalStatistics']);     // الإحصائيات العامة
         Route::get('/courses', [ReportsController::class, 'coursesAvgRating']); // متوسط تقييم الكورسات
+        Route::get('/download', [ReportsController::class, 'downloadPdfReport']);
     });
 });
 
@@ -172,22 +178,22 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
     // Cart
     Route::get('/cart',  'index');
     Route::post('/cart',   'add');
-    Route::delete('/cart/{course}','remove');
+    Route::delete('/cart/{course}', 'remove');
 });
 
- Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
- Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
- Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
+Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
+Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
+Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
 
- Route::middleware(['auth:sanctum'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics']);
 });
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get   ('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
-    Route::post  ('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
-    Route::post  ('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
+    Route::get('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
+    Route::post('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
+    Route::post('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
     Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
     Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']);
 });
