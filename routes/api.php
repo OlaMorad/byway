@@ -1,4 +1,10 @@
 <?php
+
+
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\CourseController;
+
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -84,9 +90,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     | Dashboard Routes
     |--------------------------------------------------------------------------
     */
-    Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']); // إحصائيات عامة للوحة التحكم
-    Route::get('dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']); // أفضل الكورسات تقييمًا
-
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/statistics', [DashboardController::class, 'getDashboardStatistics']);
+        Route::get('/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
+        Route::get('/recent-payments', [DashboardController::class, 'getRecentPayments']);
+        Route::get('/revenue-report', [DashboardController::class, 'getRevenueReport']);      // تقرير الإيرادات حسب السنة والشهر
+    });
     /*
     |--------------------------------------------------------------------------
     | User Management Routes
@@ -109,6 +118,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/instructors', [UserManagementController::class, 'allInstructors']); // عرض كل المعلمين
     Route::post('/instructors', [UserManagementController::class, 'addInstructor']); // إضافة معلم جديد
     Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']); // تعديل بيانات المعلم
+    Route::get('/instructors/search', [UserManagementController::class, 'searchInstructors']);
 
     /*
     |--------------------------------------------------------------------------
@@ -166,6 +176,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::prefix('reports')->group(function () {
         Route::get('/', [ReportsController::class, 'generalStatistics']);     // الإحصائيات العامة
         Route::get('/courses', [ReportsController::class, 'coursesAvgRating']); // متوسط تقييم الكورسات
+        Route::get('/download', [ReportsController::class, 'downloadPdfReport']);
     });
 });
 
