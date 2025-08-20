@@ -1,13 +1,9 @@
 <?php
 
-
-use App\Http\Controllers\TeacherProfileController;
-use App\Http\Controllers\CourseController;
-
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
@@ -19,7 +15,6 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\WithdrawalController;
-use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
@@ -34,199 +29,170 @@ use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
 use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
-
 use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 
+// =====================================================================
+// Auth & User
+// =====================================================================
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
-
-
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-code', [RegisterController::class, 'verifyCode']);
-
 Route::post('/login', [LoginController::class, 'login']);
-
-// Social Login - Google
-Route::get('/auth/google/redirect', [RegisterController::class, 'redirectToGoogle']);
-Route::get('/auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me', function (Request $request) {
-        return $request->user();
-    });
-});
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout']);
-});
-
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/me', fn(Request $request) => $request->user());
+    Route::post('/logout', [LoginController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile/close-account', [ProfileController::class, 'closeAccount']);
+    Route::get('/profile/status', [ProfileController::class, 'status']);
 });
 
+// =====================================================================
+// Social Login
+// =====================================================================
+Route::get('/auth/google/redirect', [RegisterController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
 
+// =====================================================================
+// Teacher Profile
+// =====================================================================
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
+    Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update']);
+    Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+});
 
-Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
-Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update'])->middleware('auth:sanctum');
-Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+// =====================================================================
+// Courses
+// =====================================================================
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/courses', [CourseController::class, 'store']);
+    Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
+    Route::put('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
+    Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
+});
+Route::get('/courses/{id}', [CourseShowController::class, 'show']);
 
+// =====================================================================
+// Dashboard
+// =====================================================================
+Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
+Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
 
-//store course//
-Route::post('/courses', [CourseController::class, 'store']);
-
-// Admin
+// =====================================================================
+// Admin Routes
+// =====================================================================
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | Dashboard Routes
-    |--------------------------------------------------------------------------
-    */
+    // Dashboard
     Route::prefix('dashboard')->group(function () {
         Route::get('/statistics', [DashboardController::class, 'getDashboardStatistics']);
         Route::get('/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
         Route::get('/recent-payments', [DashboardController::class, 'getRecentPayments']);
-        Route::get('/revenue-report', [DashboardController::class, 'getRevenueReport']);      // تقرير الإيرادات حسب السنة والشهر
-    });
-    /*
-    |--------------------------------------------------------------------------
-    | User Management Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::prefix('users')->group(function () {
-        Route::get('/', [UserManagementController::class, 'index']);                // عرض جميع المستخدمين
-        Route::get('/search', [UserManagementController::class, 'searchUsers']);   // البحث عن مستخدمين
-        Route::get('/{id}', [UserManagementController::class, 'show']);            // عرض بروفايل مستخدم محدد
-        Route::patch('/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']); // تغيير حالة الحساب
-        Route::patch('/{userId}', [UserManagementController::class, 'updateUser']); // تعديل بيانات المستخدم
-        Route::delete('/{id}', [UserManagementController::class, 'destroy']);       // حذف مستخدم
+        Route::get('/revenue-report', [DashboardController::class, 'getRevenueReport']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Instructors Routes
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/instructors', [UserManagementController::class, 'allInstructors']); // عرض كل المعلمين
-    Route::post('/instructors', [UserManagementController::class, 'addInstructor']); // إضافة معلم جديد
-    Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']); // تعديل بيانات المعلم
+    // User Management
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserManagementController::class, 'index']);
+        Route::get('/search', [UserManagementController::class, 'searchUsers']);
+        Route::get('/{id}', [UserManagementController::class, 'show']);
+        Route::patch('/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);
+        Route::patch('/{userId}', [UserManagementController::class, 'updateUser']);
+        Route::delete('/{id}', [UserManagementController::class, 'destroy']);
+    });
+
+    // Instructors
+    Route::get('/instructors', [UserManagementController::class, 'allInstructors']);
+    Route::post('/instructors', [UserManagementController::class, 'addInstructor']);
+    Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']);
     Route::get('/instructors/search', [UserManagementController::class, 'searchInstructors']);
 
-    /*
-    |--------------------------------------------------------------------------
-    | Courses Routes
-    |--------------------------------------------------------------------------
-    */
+    // Courses Management
     Route::prefix('courses')->group(function () {
-        Route::get('/', [CourseManagementController::class, 'index']);             // عرض كل الكورسات
-        Route::get('/{id}', [CourseController::class, 'show']);                     // عرض كورس محدد
-        Route::put('/{courseId}', [CourseManagementController::class, 'update']);   // تعديل كورس
-        Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']); // حذف كورس
-        Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']); // اعتماد كورس
-        Route::get('/search', [CourseManagementController::class, 'search']);      // البحث عن كورس
+        Route::get('/', [CourseManagementController::class, 'index']);
+        Route::get('/{id}', [CourseController::class, 'show']);
+        Route::put('/{courseId}', [CourseManagementController::class, 'update']);
+        Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']);
+        Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']);
+        Route::get('/search', [CourseManagementController::class, 'search']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reviews Routes
-    |--------------------------------------------------------------------------
-    */
+    // Reviews
     Route::prefix('reviews')->group(function () {
-        Route::get('/', [ReviewManagementController::class, 'index']);          // عرض كل الريفيوهات
-        Route::get('/{id}', [ReviewManagementController::class, 'show']);      // عرض ريفيو محدد
-        Route::delete('/{id}', [ReviewManagementController::class, 'destroy']); // حذف ريفيو
-        Route::get('/search', [ReviewManagementController::class, 'search']);   // البحث عن ريفيو
+        Route::get('/', [ReviewManagementController::class, 'index']);
+        Route::get('/{id}', [ReviewManagementController::class, 'show']);
+        Route::delete('/{id}', [ReviewManagementController::class, 'destroy']);
+        Route::get('/search', [ReviewManagementController::class, 'search']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Categories Routes
-    |--------------------------------------------------------------------------
-    */
+    // Categories
     Route::prefix('categories')->group(function () {
-        Route::get('/', [PlatformSettingsController::class, 'index']);        // جلب كل الكاتيجوريز
-        Route::post('/', [PlatformSettingsController::class, 'store']);       // إضافة كاتيجوري جديدة
-        Route::put('/{id}', [PlatformSettingsController::class, 'update']);   // تعديل اسم الكاتيجوري
-        Route::delete('/{id}', [PlatformSettingsController::class, 'destroy']); // حذف كاتيجوري
+        Route::get('/', [PlatformSettingsController::class, 'index']);
+        Route::post('/', [PlatformSettingsController::class, 'store']);
+        Route::put('/{id}', [PlatformSettingsController::class, 'update']);
+        Route::delete('/{id}', [PlatformSettingsController::class, 'destroy']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Platform Settings Routes
-    |--------------------------------------------------------------------------
-    */
+    // Platform Settings
     Route::prefix('settings')->group(function () {
-        Route::get('/', [PlatformSettingsController::class, 'showSettings']);  // عرض الإعدادات
-        Route::put('/', [PlatformSettingsController::class, 'editSettings']);  // تعديل الإعدادات
+        Route::get('/', [PlatformSettingsController::class, 'showSettings']);
+        Route::put('/', [PlatformSettingsController::class, 'editSettings']);
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Reports Routes
-    |--------------------------------------------------------------------------
-    */
+    // Reports
     Route::prefix('reports')->group(function () {
-        Route::get('/', [ReportsController::class, 'generalStatistics']);     // الإحصائيات العامة
-        Route::get('/courses', [ReportsController::class, 'coursesAvgRating']); // متوسط تقييم الكورسات
+        Route::get('/', [ReportsController::class, 'generalStatistics']);
+        Route::get('/courses', [ReportsController::class, 'coursesAvgRating']);
         Route::get('/download', [ReportsController::class, 'downloadPdfReport']);
     });
 });
 
+// =====================================================================
+// Cart
+// =====================================================================
 Route::middleware('auth:sanctum')->controller(CartController::class)->group(function () {
-    // Cart
-    Route::get('/cart',  'index');
-    Route::post('/cart',   'add');
+    Route::get('/cart', 'index');
+    Route::post('/cart', 'add');
     Route::delete('/cart/{course}', 'remove');
 });
 
-// payment
-
+// =====================================================================
+// Payment
+// =====================================================================
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
     Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
-    Route::post('/checkout',   [CheckoutController::class, 'checkout']);
+    Route::post('/checkout', [CheckoutController::class, 'checkout']);
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM']);
     Route::get('/payment-history', PaymentHistoryController::class);
     Route::post('/instructor/withdrawals/request', [WithdrawalController::class, 'requestWithdrawal']);
 });
 
-
-
-
-
+// =====================================================================
+// Notifications
+// =====================================================================
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics']);
+    Route::get('/teacher/notifications', [TeacherNotificationController::class, 'index']);
+    Route::post('/teacher/notifications/mark-all', [TeacherNotificationController::class, 'markAllAsRead']);
+    Route::post('/teacher/notifications/{id}/read', [TeacherNotificationController::class, 'markAsRead']);
+    Route::delete('/teacher/notifications/{id}', [TeacherNotificationController::class, 'destroy']);
+    Route::delete('/teacher/notifications', [TeacherNotificationController::class, 'destroyAll']);
 });
 
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('/teacher/notifications',            [TeacherNotificationController::class, 'index']);
-    Route::post('/teacher/notifications/mark-all',   [TeacherNotificationController::class, 'markAllAsRead']);
-    Route::post('/teacher/notifications/{id}/read',  [TeacherNotificationController::class, 'markAsRead']);
-    Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
-    Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']);
-});
-
-
-
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/learner/courses', [LearnerCourseController::class, 'index']);
-});
-
-Route::middleware('auth:sanctum')->prefix('profile')->group(function () {
-    Route::post('/close-account', [ProfileController::class, 'closeAccount']);
-    Route::get('/status', [ProfileController::class, 'status']);
-});
-
+// =====================================================================
+// Learner
+// =====================================================================
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Courses
+    Route::get('/courses', [LearnerCourseController::class, 'index']);
+
     // Favorites
     Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);
     Route::post('/favorites/remove', [CourseInteractionController::class, 'removeFromFavorites']);
@@ -236,16 +202,8 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::post('/cart/add', [CourseInteractionController::class, 'addToCart']);
     Route::post('/cart/remove', [CourseInteractionController::class, 'removeFromCart']);
     Route::get('/cart', [CourseInteractionController::class, 'getCart']);
-});
 
-// Public route – no login required
-Route::get('/courses/{id}', [CourseShowController::class, 'show']);
-
-Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
-    // Mark lesson as completed
+    // Lessons & Reviews
     Route::post('/lessons/{lessonId}/complete', [CourseProgressController::class, 'completeLesson']);
-
-    // Submit course review
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
 });
-

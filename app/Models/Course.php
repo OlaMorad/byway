@@ -34,6 +34,8 @@ class Course extends Model
         return $this->hasMany(Lesson::class);
     }
 
+
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -47,16 +49,16 @@ class Course extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function instructor()
+    {
+    return $this->belongsTo(User::class, 'instructor_id');
+    }
 
     public function carts()
     {
         return $this->hasMany(Cart::class);
     }
 
-    public function instructor()
-    {
-        return $this->belongsTo(User::class, 'instructor_id');
-    }
     public function toSearchableArray()
     {
         $array = [
@@ -69,4 +71,5 @@ class Course extends Model
 
         return $array;
     }
+
 }

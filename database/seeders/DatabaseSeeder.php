@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         Review::factory(50)->create();
 
     $this->call([
+      InstructorProfileSeeder::class,
         UserSeeder::class,
         PaymentSeeder::class,
         CourseSeeder::class,
