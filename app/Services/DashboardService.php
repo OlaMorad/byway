@@ -24,7 +24,7 @@ class DashboardService
             ])->count(),
 
             'published_courses' => Course::where('status', 'published')->count(),
-            'Total Revenue' => Payment::sum('amount'),
+            'Total Revenue' => (float) Payment::sum('amount'),
         ];
         return ApiResponse::sendResponse(200, 'Dashboard statistics retrieved successfully', $data);
     }
@@ -41,7 +41,7 @@ class DashboardService
                 return [
                     'id' => $course->id,
                     'title' => $course->title,
-                    'average_rating' => number_format($course->reviews_avg_rating ?? 0, 2),
+                    'average_rating' => round($course->reviews_avg_rating ?? 0, 2),
                     'reviews_count' => $course->reviews_count ?? 0,
                     'instructor_name' => $course->user->name ?? null,
                 ];
