@@ -175,6 +175,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/instructor/withdrawals/request', [WithdrawalController::class, 'requestWithdrawal']);
 });
 
+
+Route::get('/instructor/revenue-analytics' , [InstructorRevenueController::class , 'analytics'])->middleware('auth:sanctum');
+
 // =====================================================================
 // Notifications
 // =====================================================================
