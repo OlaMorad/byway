@@ -1,34 +1,40 @@
 <?php
 
+
 use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
-
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\Auth\ResetPasswordController;
-use App\Http\Controllers\Api\ProfileController;
-
+use App\Http\Controllers\Api\CourseShowController;
+use App\Http\Controllers\Api\WithdrawalController;
+use App\Http\Controllers\TeacherProfileController;
+use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
 use App\Http\Controllers\Api\UserManagementController;
+use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\InstructorStripeController;
 use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\ReviewManagementController;
-use App\Http\Controllers\Api\LearnerCourseController;
-use App\Http\Controllers\Api\Learner\CourseInteractionController;
-use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\InstructorRevenueController;
 use App\Http\Controllers\Api\TeacherNotificationController;
 use App\Http\Controllers\Api\Learner\CourseProgressController;
+use App\Http\Controllers\Api\Learner\CourseInteractionController;
+
 use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 
@@ -37,10 +43,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
-    Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
-});
+
 
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-code', [RegisterController::class, 'verifyCode']);
@@ -184,9 +187,20 @@ Route::middleware('auth:sanctum')->controller(CartController::class)->group(func
     Route::delete('/cart/{course}', 'remove');
 });
 
-Route::post('/checkout',   [CheckoutController::class, 'checkout'])->middleware('auth:sanctum');
-Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM'])->middleware('auth:sanctum');
-Route::get('/payment-history', PaymentHistoryController::class)->middleware('auth:sanctum');
+// payment
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('payment-methods/setup-intent', [PaymentMethodController::class, 'createSetupIntent']);
+    Route::apiResource('payment-methods', PaymentMethodController::class)->except(['show', 'update']);
+    Route::post('/checkout',   [CheckoutController::class, 'checkout']);
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirmWithSavedPM']);
+    Route::get('/payment-history', PaymentHistoryController::class);
+    Route::post('/instructor/withdrawals/request', [WithdrawalController::class, 'requestWithdrawal']);
+});
+
+
+
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics']);
@@ -200,8 +214,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/teacher/notifications/{id}',        [TeacherNotificationController::class, 'destroy']);
     Route::delete('/teacher/notifications',            [TeacherNotificationController::class, 'destroyAll']);
 });
-
-
 
 
 
@@ -235,16 +247,5 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
 
     // Submit course review
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
-});
-
-Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
-    // Get all notifications
-    Route::get('/notifications', [NotificationController::class, 'index']);
-
-    // Mark as read
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
-
-    // Delete notification
-    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 });
 
