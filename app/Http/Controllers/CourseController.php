@@ -19,7 +19,7 @@ class CourseController extends Controller
         $validatecourses = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'video'       => 'required|file|mimes:mp4,mov,avi|max:204800', // 200MB
+            'video'       => 'required|file|mimes:mp4,mov,avi', // 200MB
             'status'      => 'required|in:published,unpublished',
             'price'       => 'required|numeric|min:0',
             'category_id' => 'required|exists:categories,id'
@@ -31,16 +31,16 @@ class CourseController extends Controller
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('videos', 'public');
         }
-    // تخزين بيانات الكورس
-    $course = Course::create([
-        'user_id'     => auth()->id(),
-        'title'       => $request->title,
-        'description' => $request->description,
-        'price'       => $request->price,
-        'category_id' => $request->category_id,
-        'status'      => $request->status,
-        'video_url'=>$videoPath
-    ]);
+        // تخزين بيانات الكورس
+        $course = Course::create([
+            'user_id'     => auth()->id(),
+            'title'       => $request->title,
+            'description' => $request->description,
+            'price'       => $request->price,
+            'category_id' => $request->category_id,
+            'status'      => $request->status,
+            'video_url' => $videoPath
+        ]);
 
         return ApiResponse::sendResponse(200, 'Course created successfully', $course);
     }
@@ -50,14 +50,14 @@ class CourseController extends Controller
     public function listCourses(Request $request)
     {
         $instructorId = Auth::id();
-        $query = Course::where('user_id', $instructorId);
+        $query = Course::where('user_id', $instructorId)->latest();
 
         // البحث بالكلمة
         if ($request->has('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'LIKE', "%{$search}%")
-                  ->orWhere('description', 'LIKE', "%{$search}%");
+                    ->orWhere('description', 'LIKE', "%{$search}%");
             });
         }
 
@@ -86,10 +86,18 @@ class CourseController extends Controller
     public function update(Request $request, $id)
     {
         $course = Course::where('id', $id)
-                        ->where('user_id', Auth::id())
-                        ->firstOrFail();
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-        $course->update($request->only(['title', 'description', 'price', 'category_id']));
+        $validatedData = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'nullable|numeric',
+            'video_url' => 'nullable|string',
+        ]);
+
+        $course->update($validatedData);
+        $course->refresh();
 
         return ApiResponse::sendResponse(200, 'Course updated successfully', $course);
     }
@@ -99,32 +107,33 @@ class CourseController extends Controller
     public function destroy($id)
     {
         $course = Course::where('id', $id)
-                        ->where('user_id', Auth::id())
-                        ->firstOrFail();
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-    if (!$course) {
-        return response()->json(['message' => 'Course not found'], 404);
+        if (!$course) {
+            return response()->json(['message' => 'Course not found'], 404);
+        }
+
+        // التأكد إن اللي عامل auth هو صاحب الكورس
+
+        if ($course->user_id !== auth()->id()) {
+            return ApiResponse::sendResponse(
+                403,
+                'You are not the instructor of this course, so you cannot delete it.'
+            );
+        }
+
+        // حذف الـ reviews المرتبطة
+        if ($course->reviews()->count() > 0) {
+            $course->reviews()->delete();
+        }
+
+        $course->delete();
+        return ApiResponse::sendResponse(200, 'Course and its lessons deleted successfully');
     }
-
-    // التأكد إن اللي عامل auth هو صاحب الكورس
-
-    if ($course->user_id !== auth()->id()) {
-        return ApiResponse::sendResponse(
-            403,
-            'You are not the instructor of this course, so you cannot delete it.'
-        );
+    public function show($id)
+    {
+        $course = Course::with(['instructor', 'lessons', 'reviews.user'])->findOrFail($id);
+        return ApiResponse::sendResponse(200, 'Course details retrieved successfully', $course);
     }
-
-    // حذف الـ reviews المرتبطة
-    if ($course->reviews()->count() > 0) {
-        $course->reviews()->delete();
-    }
-
-    $course->delete();
-    return ApiResponse::sendResponse(200, 'Course and its lessons deleted successfully', $course);
-
-}
-
-
-
 }

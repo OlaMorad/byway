@@ -75,7 +75,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses', [CourseController::class, 'store']);
     Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
-    Route::put('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
+    Route::get('/instructor/courses/{id}',[CourseController::class,'show'])->middleware('role:instructor');
+    Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
 Route::get('/courses/{id}', [CourseShowController::class, 'show']);
