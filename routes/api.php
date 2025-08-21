@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
+
 Route::get('/courses/{id}', [CourseShowController::class, 'show']);
 
 // =====================================================================
@@ -211,3 +212,7 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::post('/lessons/{lessonId}/complete', [CourseProgressController::class, 'completeLesson']);
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
 });
+
+
+
+Route::get('/all-courses', [CourseShowController::class, 'index']);

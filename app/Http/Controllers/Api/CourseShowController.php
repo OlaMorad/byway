@@ -11,6 +11,43 @@ use App\Helpers\ApiResponse;
 class CourseShowController extends Controller
 {
     /**
+     * List all published courses with optional filters
+     */
+    public function index(Request $request)
+    {
+        $query = Course::with([
+            'user:id,name,image',
+            'category:id,name',
+        ])->where('status', 'published');
+
+        if ($request->has('search') && $request->search !== null && $request->search !== '') {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            });
+        }
+
+        if ($request->has('category_id') && $request->category_id !== null) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $allowedSortBy = ['created_at', 'price', 'title'];
+        $sortBy = in_array($request->get('sort_by'), $allowedSortBy, true) ? $request->get('sort_by') : 'created_at';
+        $sortOrder = $request->get('sort_order', 'desc') === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        $perPage = (int) ($request->get('per_page', 12));
+        if ($perPage <= 0) {
+            $perPage = 12;
+        }
+
+        $courses = $query->paginate($perPage);
+
+        return ApiResponse::sendResponse(200, 'Courses retrieved.', $courses);
+    }
+
+    /**
      * Get details of a specific course
      */
     public function show($id)
@@ -60,7 +97,7 @@ class CourseShowController extends Controller
                 ];
             }),
 
-    
+
             'average_rating' => round($course->reviews->avg('rating'), 1),
         ]);
     }
