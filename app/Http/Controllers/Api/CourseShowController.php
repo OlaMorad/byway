@@ -74,10 +74,10 @@ class CourseShowController extends Controller
             'updated_at' => $course->updated_at,
 
             'instructor' => [
-                'id' => $course->user->id,
-                'name' => $course->user->name,
-                'about' => $course->user->about ?? 'No bio available',
-                'image' => $course->user->image ? url('storage/' . $course->user->image) : null,
+                'id' => $course->user?->id,
+                'name' => $course->user?->name,
+                'about' => $course->user?->about ?? 'No bio available',
+                'image' => $course->user?->image ? url('storage/' . $course->user->image) : null,
             ],
 
             'content' => $course->lessons->map(function ($lesson) {
@@ -92,7 +92,7 @@ class CourseShowController extends Controller
                 return [
                     'rating' => $review->rating,
                     'review' => $review->review,
-                    'learner_name' => $review->user->name,
+                    'learner_name' => $review->user?->name ?? 'Unknown',
                     'created_at' => $review->created_at->diffForHumans(),
                 ];
             }),
