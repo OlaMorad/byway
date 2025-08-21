@@ -8,10 +8,10 @@ use App\Models\Lesson;
 use App\Models\Review;
 use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\FavoritesCartSeeder;
 use Illuminate\Database\Seeder;
 use Database\Factories\ReviewFactory;
 use Illuminate\Support\Facades\Hash;
-use Database\Seeders\FavoritesTableSeeder;
 
 class DatabaseSeeder extends Seeder
 {

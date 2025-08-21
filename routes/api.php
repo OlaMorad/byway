@@ -31,6 +31,13 @@ use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PlatformSettingsController;
+use App\Http\Controllers\Api\InstructorPublicController;
+
+// =====================================================================
+// Public Instructor Routes (No Authentication Required)
+// =====================================================================
+Route::get('/all-instructors', [InstructorPublicController::class, 'index']);
+Route::get('/all-instructors/{id}', [InstructorPublicController::class, 'show']);
 
 // =====================================================================
 // Auth & User
