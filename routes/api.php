@@ -80,7 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
 
-Route::get('/courses/{id}', [CourseShowController::class, 'show']);
 
 // =====================================================================
 // Dashboard
@@ -216,3 +215,4 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
 
 
 Route::get('/all-courses', [CourseShowController::class, 'index']);
+Route::get('/course/{id}', [CourseShowController::class, 'show']);
