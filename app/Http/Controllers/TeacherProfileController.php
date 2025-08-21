@@ -5,18 +5,15 @@ namespace App\Http\Controllers;
 use App\Helpers\ApiResponse;
 use App\Models\InstructorProfile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class TeacherProfileController extends Controller
 {
-    // عرض البروفايل
+
     public function show()
     {
-
         $teacher = InstructorProfile::where('user_id', auth()->id())
-                                    ->with('user')
-                                    ->first();
+            ->with('user')
+            ->first();
 
         if (!$teacher) {
             return ApiResponse::sendResponse(404, 'Teacher profile not found');
@@ -25,83 +22,62 @@ class TeacherProfileController extends Controller
         return ApiResponse::sendResponse(200, 'Teacher profile found successfully', $teacher);
     }
 
-    // update profile//
-    public function update(Request $request){
-    $data = $request->validate([
-        'bio'            => 'sometimes|string|max:1000',
-        'name'=> 'sometimes|string|max:255',
-        'total_earnings' => 'sometimes|numeric|min:0',
-        'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'twitter_link'   => 'nullable|url',
-        'linkdin_link'   => 'nullable|url',
-        'youtube_link'   => 'nullable|url',
-        'facebook_link'  => 'nullable|url',
+    // update profile
+    public function update(Request $request)
+    {
+        $data = $request->validate([
+            'bio'            => 'sometimes|string|max:1000',
+            'name'           => 'sometimes|string|max:255',
+            'twitter_link'   => 'nullable|url',
+            'linkdin_link'   => 'nullable|url',
+            'youtube_link'   => 'nullable|url',
+            'facebook_link'  => 'nullable|url',
+        ]);
 
-    ]);
+        $user = auth()->user();
+        $instructor = InstructorProfile::where('user_id', $user->id)->first();
 
-$user = auth()->user();
-    $instructor = InstructorProfile::where('user_id', $user->id)->first();
+        if (!$instructor) {
+            return ApiResponse::sendResponse(404, 'Profile not found');
+        }
 
-    if (!$instructor ) {
-    return ApiResponse::sendResponse(404, 'Profile not found');
-    }
-
-    // تحديث الاسم في جدول users إذا موجود
-    if (isset($data['name'])) {
-        $user->name = $data['name'];
-        $user->save();
-        unset($data['name']);
-
-    }
-    // لو فيه صورة جديدة
-    if ($request->hasFile('image')) {
-        if ($instructor->image && Storage::disk('public')->exists($instructor->image)) {
-            Storage::disk('public')->delete($instructor->image);
-
-
-        // تحديث الاسم في جدول users
-        if (isset($data['name'])) {
+        if (array_key_exists('name', $data)) {
             $user->name = $data['name'];
             $user->save();
             unset($data['name']);
         }
 
-        // تحديث الصورة لو فيه صورة جديدة
-        if ($request->hasFile('image')) {
-            if ($instructor->image && Storage::disk('public')->exists($instructor->image)) {
-                Storage::disk('public')->delete($instructor->image);
-            }
-            $data['image'] = $request->file('image')->store('instructors', 'public');
+        if (!empty($data)) {
+            $instructor->update($data);
         }
 
-        $instructor->update($data);
+        $instructor->load('user');
 
         return ApiResponse::sendResponse(200, 'Profile updated successfully', $instructor);
-    }}
+    }
 
-    $instructor->update($data);
 
-    return ApiResponse::sendResponse(200, 'Profile updated successfully', $instructor);
-}
-
-    // إنشاء بروفايل جديد
     public function store(Request $request)
     {
         $validated = $request->validate([
             'bio'            => 'required|string|max:1000',
-            'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'google_link'  => 'nullable|url',
-            'github_link'   => 'nullable|url',
-            'facebook_link'  => 'nullable|url'
+            'twitter_link'   => 'nullable|url',
+            'linkdin_link'   => 'nullable|url',
+            'youtube_link'   => 'nullable|url',
+            'facebook_link'  => 'nullable|url',
         ]);
 
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('instructors', 'public');
+        $userId = auth()->id();
+
+        $existing = InstructorProfile::where('user_id', $userId)->first();
+        if ($existing) {
+            return ApiResponse::sendResponse(409, 'Profile already exists', $existing);
         }
 
-        $validated['user_id'] = auth()->id();
+        $validated['user_id'] = $userId;
 
-        $profile = InstructorProfile::create($validated);
+        $profile = InstructorProfile::create($validated)->load('user');
 
-        return ApiResponse::sendResponse(200, 'Profile created successfully', $profile);
-    }}
+        return ApiResponse::sendResponse(201, 'Profile created successfully', $profile);
+    }
+}

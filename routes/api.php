@@ -61,12 +61,12 @@ Route::get('/auth/google/redirect', [RegisterController::class, 'redirectToGoogl
 Route::get('/auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
 
 // =====================================================================
-// Teacher Profile
+// Instructor Profile
 // =====================================================================
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
-    Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update']);
-    Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
+    Route::get('/instructor/profile', [TeacherProfileController::class, 'show']);
+    Route::patch('/instructor/profile/update', [TeacherProfileController::class, 'update']);
+    Route::post('/instructor/profile/store', [TeacherProfileController::class, 'store']);
 });
 
 // =====================================================================
