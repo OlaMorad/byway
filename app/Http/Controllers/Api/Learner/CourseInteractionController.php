@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helpers\ApiResponse;
 use App\Models\Cart;
-use App\Models\favorite;
+use App\Models\Favorite;
 
 class CourseInteractionController extends Controller
 {
