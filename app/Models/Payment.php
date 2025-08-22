@@ -23,4 +23,9 @@ class Payment extends Model
         return $this->hasOne(Order::class);
     }
 
+    public function userPaymentMethod()
+    {
+        return $this->hasOne(PaymentMethod::class, 'user_id', 'user_id');
+    }
+
 }

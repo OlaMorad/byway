@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Review;
 use App\Helpers\ApiResponse;
 use App\Models\Payment;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,13 +19,21 @@ class ReportsService
         $instructorsCount = User::where('role', 'instructor')->count();
         $learnersCount = User::where('role', 'learner')->count();
         $coursesCount = Course::count();
-        $totalEarnings = Payment::sum('amount'); // مجموع المدفوعات
+
+        // جلب نسبة العمولة من جدول settings أو استخدم القيمة الافتراضية 15%
+        $commissionRate = Setting::first()->commission ?? 15.00;
+
+        // إجمالي المدفوعات
+        $totalPayments = Payment::where('type', 'payment')->sum('amount');
+
+        // ربح المنصة = إجمالي المدفوعات * نسبة العمولة
+        $platformEarnings = ($totalPayments * $commissionRate) / 100;
 
         $data = [
             'instructors' => $instructorsCount,
             'learners'    => $learnersCount,
             'courses'     => $coursesCount,
-            'earnings'    => round($totalEarnings, 2),
+            'earnings'    => round($platformEarnings, 2),
         ];
 
         return ApiResponse::sendResponse(200, 'General statistics retrieved successfully', $data);

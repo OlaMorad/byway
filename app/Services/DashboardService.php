@@ -6,6 +6,8 @@ use App\Helpers\ApiResponse;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Payment;
+use App\Models\Setting;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -24,7 +26,7 @@ class DashboardService
             ])->count(),
 
             'published_courses' => Course::where('status', 'published')->count(),
-            'Total Revenue' => (float) Payment::sum('amount'),
+            'Total Revenue' => (float) Payment::where('type', 'payment')->sum('amount'),
         ];
         return ApiResponse::sendResponse(200, 'Dashboard statistics retrieved successfully', $data);
     }
@@ -33,10 +35,10 @@ class DashboardService
     {
         $courses = Course::withAvg('reviews', 'rating')
             ->withCount('reviews')
-            ->with('instructor:id,name')
+            ->with('user:id,name')
             ->orderByDesc('reviews_avg_rating')
             ->take(5)
-            ->get(['id', 'title', 'instructor_id'])
+            ->get(['id', 'title', 'user_id'])
             ->map(function ($course) {
                 return [
                     'id' => $course->id,
@@ -59,10 +61,10 @@ class DashboardService
             ->get()
             ->map(function ($payment) {
                 return [
-                    'customer' => $payment->user->name,
+                    'customer' => $payment->user->name ?? null,
                     'date'          => $payment->created_at->format('Y-m-d'),
                     'type'          => $payment->paymentMethod?->brand ?? null,
-                    'amount'        => $payment->amount,
+                    'amount'        => (float) $payment->amount,
                 ];
             });
 
@@ -72,32 +74,94 @@ class DashboardService
 
     public function getRevenueReport()
     {
+        $currentYear = Carbon::now()->year;
+        $startYear = $currentYear - 4 + 1; // آخر 3 سنين + السنة الحالية
+
+        // جلب كل المدفوعات من النوع 'payment' ضمن السنوات المطلوبة
         $revenues = Payment::selectRaw('
             YEAR(created_at) as year,
             MONTH(created_at) as month,
             SUM(amount) as revenue
         ')
-            ->whereBetween(DB::raw('YEAR(created_at)'), [2022, 2025]) // من 2022 لحد 2025
+            ->where('type', 'payment')
+            ->whereBetween(DB::raw('YEAR(created_at)'), [$startYear, $currentYear])
             ->groupBy('year', 'month')
             ->orderBy('year', 'desc')
             ->orderBy('month', 'asc')
-            ->get();
+            ->get()
+            ->keyBy(fn($item) => $item->year . '-' . $item->month);
 
-        // نعيد تنسيق البيانات
-        $formatted = $revenues->map(function ($item) {
-            $monthName = date('M', mktime(0, 0, 0, $item->month, 1));
-            return [
-                'month'   => $monthName,
-                'revenue' => (float) $item->revenue,
-                'date'    => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT),
-            ];
-        });
+        $result = [];
 
-        // تقسيم حسب السنوات (2025 → 2022)
-        $grouped = $formatted->groupBy(function ($item) {
-            return substr($item['date'], 0, 4); // السنة
-        })->sortKeysDesc();
+        for ($year = $startYear; $year <= $currentYear; $year++) {
+            $result[$year] = [];
 
-        return ApiResponse::sendResponse(200, 'Revenue report retrieved successfully', $grouped);
+            for ($month = 1; $month <= 12; $month++) {
+                $key = $year . '-' . $month;
+                $revenue = isset($revenues[$key]) ? (float) $revenues[$key]->revenue : 0;
+
+                $result[$year][] = [
+                    'month' => date('M', mktime(0, 0, 0, $month, 1)),
+                    'revenue' => $revenue,
+                    'date' => $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT),
+                ];
+            }
+        }
+
+        // ترتيب السنوات من الأحدث للأقدم
+        $result = collect($result)->sortKeysDesc();
+
+        return ApiResponse::sendResponse(200, 'Revenue report retrieved successfully', $result);
+    }
+
+
+    public function getInstructorRevenueReport()
+    {
+        $currentYear = Carbon::now()->year;
+        $startYear = $currentYear - 4 + 1; // آخر 3 سنين + السنة الحالية
+
+        // نسبة العمولة من جدول settings أو القيمة الافتراضية 15%
+        $commissionRate = Setting::first()->commission ?? 15.00;
+
+        // جلب كل عمليات السحب (withdrawal) ضمن السنوات المطلوبة
+        $withdrawals = Payment::selectRaw('
+            YEAR(created_at) as year,
+            MONTH(created_at) as month,
+            SUM(amount) as total_withdrawals
+        ')
+            ->where('type', 'withdrawal')
+            ->where('status', 'succeeded') // نتأكد انه Approved
+            ->whereBetween(DB::raw('YEAR(created_at)'), [$startYear, $currentYear])
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'asc')
+            ->get()
+            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+
+        $result = [];
+
+        for ($year = $startYear; $year <= $currentYear; $year++) {
+            $result[$year] = [];
+
+            for ($month = 1; $month <= 12; $month++) {
+                $key = $year . '-' . $month;
+
+                $withdrawalAmount = isset($withdrawals[$key]) ? (float) $withdrawals[$key]->total_withdrawals : 0;
+
+                // خصم عمولة المنصة
+                $instructorRevenue = $withdrawalAmount - (($withdrawalAmount * $commissionRate) / 100);
+
+                $result[$year][] = [
+                    'month' => date('M', mktime(0, 0, 0, $month, 1)),
+                    'revenue' => round($instructorRevenue, 2),
+                    'date' => $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT),
+                ];
+            }
+        }
+
+        // ترتيب السنوات من الأحدث للأقدم
+        $result = collect($result)->sortKeysDesc();
+
+        return ApiResponse::sendResponse(200, 'Instructor revenue report retrieved successfully', $result);
     }
 }

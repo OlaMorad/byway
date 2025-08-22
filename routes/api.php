@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\TeacherNotificationController;
 use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\Learner\NotificationController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 use App\Http\Controllers\Api\InstructorPublicController;
 
@@ -89,13 +90,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // =====================================================================
-// Dashboard
+// Admin Routes
 // =====================================================================
-Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
-Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
+
+Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
+    Route::get('/instructor/revenue-report', [DashboardController::class, 'getInstructorRevenueReport']);
+});
 
 // =====================================================================
-// Admin Routes
+// Dashboard
 // =====================================================================
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Dashboard
@@ -125,7 +128,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Courses Management
     Route::prefix('courses')->group(function () {
         Route::get('/', [CourseManagementController::class, 'index']);
-        Route::get('/{id}', [CourseController::class, 'show']);
+        Route::get('/{id}', [CourseManagementController::class, 'show']);
         Route::put('/{courseId}', [CourseManagementController::class, 'update']);
         Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']);
         Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']);
@@ -160,7 +163,18 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::get('/courses', [ReportsController::class, 'coursesAvgRating']);
         Route::get('/download', [ReportsController::class, 'downloadPdfReport']);
     });
+
+    // Payment
+    Route::prefix('payments')->group(function () {
+        Route::get('/statistics', [PaymentController::class, 'statistics']);        // إحصائيات الدفعات
+        Route::get('/all', [PaymentController::class, 'allPayments']);             // كل الدفعات
+        Route::patch('/withdrawals/approve/{id}', [PaymentController::class, 'approveWithdrawal']); // الموافقة على سحب
+        Route::patch('/withdrawals/reject/{id}', [PaymentController::class, 'rejectWithdrawal']);   // رفض سحب
+        Route::get('/{id}', [PaymentController::class, 'show']);                   // تفاصيل دفع معينة
+    });
+
 });
+
 
 // =====================================================================
 // Cart
