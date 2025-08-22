@@ -32,6 +32,13 @@ use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlatformSettingsController;
+use App\Http\Controllers\Api\InstructorPublicController;
+
+// =====================================================================
+// Public Instructor Routes (No Authentication Required)
+// =====================================================================
+Route::get('/all-instructors', [InstructorPublicController::class, 'index']);
+Route::get('/all-instructors/{id}', [InstructorPublicController::class, 'show']);
 
 // =====================================================================
 // Auth & User
@@ -62,12 +69,12 @@ Route::get('/auth/google/redirect', [RegisterController::class, 'redirectToGoogl
 Route::get('/auth/google/callback', [RegisterController::class, 'handleGoogleCallback']);
 
 // =====================================================================
-// Teacher Profile
+// Instructor Profile
 // =====================================================================
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/teacher/profile', [TeacherProfileController::class, 'show']);
-    Route::post('/teacher/profile/{id}', [TeacherProfileController::class, 'update']);
-    Route::post('/teacher/profile', [TeacherProfileController::class, 'store']);
+Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
+    Route::get('/instructor/profile', [TeacherProfileController::class, 'show']);
+    Route::patch('/instructor/profile/update', [TeacherProfileController::class, 'update']);
+    Route::post('/instructor/profile/store', [TeacherProfileController::class, 'store']);
 });
 
 // =====================================================================
@@ -76,10 +83,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses', [CourseController::class, 'store']);
     Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
-    Route::put('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
+    Route::get('/instructor/courses/{id}',[CourseController::class,'show'])->middleware('role:instructor');
+    Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
-Route::get('/courses/{id}', [CourseShowController::class, 'show']);
+
 
 // =====================================================================
 // Admin Routes
@@ -224,3 +232,8 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::post('/lessons/{lessonId}/complete', [CourseProgressController::class, 'completeLesson']);
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
 });
+
+
+
+Route::get('/all-courses', [CourseShowController::class, 'index']);
+Route::get('/course/{id}', [CourseShowController::class, 'show']);

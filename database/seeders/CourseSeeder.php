@@ -33,7 +33,7 @@ class CourseSeeder extends Seeder
             'title' => 'Advanced React',
             'description' => 'Deep dive into React concepts.',
             'video_url' => 'https://example.com/videos/advanced-react.mp4',
-            'status' => 'unpublished',
+            'status' => 'pending',
             'price' => 200,
             'category_id' => 2,
         ]);

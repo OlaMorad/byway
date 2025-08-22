@@ -8,10 +8,10 @@ use App\Models\Lesson;
 use App\Models\Review;
 use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\FavoritesCartSeeder;
 use Illuminate\Database\Seeder;
 use Database\Factories\ReviewFactory;
 use Illuminate\Support\Facades\Hash;
-use Database\Seeders\FavoritesTableSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('12345678'),
             ]);
         }
+
         User::factory(10)->sequence(['role' => 'learner'], ['role' => 'instructor'])->create();
         $this->call([
             CategorySeeder::class,
@@ -36,12 +37,12 @@ class DatabaseSeeder extends Seeder
         Lesson::factory(50)->create();
         Review::factory(50)->create();
 
-    $this->call([
-      InstructorProfileSeeder::class,
-        UserSeeder::class,
-        PaymentSeeder::class,
-      //  CourseSeeder::class,
-        FavoritesCartSeeder::class,
-    ]);
+        $this->call([
+            InstructorProfileSeeder::class,
+            UserSeeder::class,
+            PaymentSeeder::class,
+            CourseSeeder::class,
+            FavoritesCartSeeder::class,
+        ]);
     }
 }
