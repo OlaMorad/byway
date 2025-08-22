@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 use App\Http\Controllers\Api\InstructorPublicController;
+use App\Http\Controllers\Api\Learner\EnrollmentController;
 
 // =====================================================================
 // Public Instructor Routes (No Authentication Required)
@@ -83,7 +84,7 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses', [CourseController::class, 'store']);
     Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
-    Route::get('/instructor/courses/{id}',[CourseController::class,'show'])->middleware('role:instructor');
+    Route::get('/instructor/courses/{id}', [CourseController::class, 'show'])->middleware('role:instructor');
     Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
@@ -198,7 +199,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::get('/instructor/revenue-analytics' , [InstructorRevenueController::class , 'analytics'])->middleware('auth:sanctum');
+Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics'])->middleware('auth:sanctum');
 
 // =====================================================================
 // Notifications
@@ -237,3 +238,15 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
 
 Route::get('/all-courses', [CourseShowController::class, 'index']);
 Route::get('/course/{id}', [CourseShowController::class, 'show']);
+
+
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Enroll in course
+    Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll']);
+
+    // My Courses
+    Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
+
+    // View one enrolled course
+    Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
+});
