@@ -20,14 +20,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('12345678'),
-            'role' => 'admin',
-            'status' => 'Active',
-        ]);
-
+        for ($i = 1; $i <= 7; $i++) {
+            User::factory()->create([
+                'role' => 'admin',
+                'status' => 'Active',
+                'email' => "admin{$i}@gmail.com",
+                'password' => Hash::make('12345678'),
+            ]);
+        }
         User::factory(10)->sequence(['role' => 'learner'], ['role' => 'instructor'])->create();
         $this->call([
             CategorySeeder::class,
@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
       InstructorProfileSeeder::class,
         UserSeeder::class,
         PaymentSeeder::class,
-        CourseSeeder::class,
+      //  CourseSeeder::class,
         FavoritesCartSeeder::class,
     ]);
     }

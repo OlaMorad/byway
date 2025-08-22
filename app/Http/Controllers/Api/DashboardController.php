@@ -28,4 +28,9 @@ class DashboardController extends Controller
     {
         return $this->dashboardService->getRevenueReport();
     }
+    //  المخطط عند ال Instructor
+    public function getInstructorRevenueReport()
+    {
+        return $this->dashboardService->getInstructorRevenueReport();
+    }
 }
