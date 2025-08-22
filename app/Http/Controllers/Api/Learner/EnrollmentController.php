@@ -36,6 +36,7 @@ class EnrollmentController extends Controller
         Enrollment::create([
             'learner_id' => $userId,
             'course_id' => $courseId,
+            'enrolled_at' => now(),
         ]);
 
         return ApiResponse::sendResponse(200, 'Successfully enrolled in the course.');
