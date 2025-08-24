@@ -33,4 +33,9 @@ class DashboardController extends Controller
     {
         return $this->dashboardService->getInstructorRevenueReport();
     }
+
+    public function getInstructorPayments($limit = 10)
+    {
+        return $this->dashboardService->getInstructorPayments($limit);
+    }
 }
