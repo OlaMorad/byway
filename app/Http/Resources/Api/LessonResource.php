@@ -31,7 +31,7 @@ class LessonResource extends JsonResource
                     'title' => $this->course->title,
                 ];
             }),
-            'completion_status' => $this->when($request->user(), function () {
+            'completion_status' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
                 if (!$user) return null;
 
@@ -41,7 +41,7 @@ class LessonResource extends JsonResource
 
                 return $completion ? 'Completed' : 'Not Started';
             }),
-            'completion_date' => $this->when($request->user(), function () {
+            'completion_date' => $this->when($request->user(), function () use ($request) {
                 $user = $request->user();
                 if (!$user) return null;
 

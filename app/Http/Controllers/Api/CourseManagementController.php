@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Category;
+use App\Http\Resources\Api\CourseResource;
+use App\Http\Resources\Api\CourseCollection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +26,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $courses
+            'data' => new CourseCollection($courses)
         ]);
     }
 
@@ -41,7 +43,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $course
+            'data' => new CourseResource($course)
         ]);
     }
 
@@ -180,32 +182,6 @@ class CourseManagementController extends Controller
         ]);
     }
 
-    /**
-     * تغيير حالة الكورس
-     */
-    public function changeStatus(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'status' => 'required|in:draft,pending,published'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $course = Course::where('user_id', Auth::id())->findOrFail($id);
-        $course->status = $request->status;
-        $course->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'The course status has been changed successfully.',
-            'data' => $course
-        ]);
-    }
 
     /**
      * الحصول على الفئات المتاحة

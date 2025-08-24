@@ -13,6 +13,7 @@ class Course extends Model
     protected $fillable = [
         'title',
         'description',
+        'image_url',
         'video_url',
         'status',
         'price',
@@ -22,6 +23,7 @@ class Course extends Model
 
     protected $casts = [
         'created_at' => 'datetime',
+        'price' => 'decimal:2',
     ];
 
     public function category()
@@ -55,6 +57,11 @@ class Course extends Model
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     public function toSearchableArray()

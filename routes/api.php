@@ -100,7 +100,6 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::post('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'store']);
     Route::put('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'update']);
     Route::delete('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'destroy']);
-    Route::patch('/courses/{id}/status', [App\Http\Controllers\Api\CourseManagementController::class, 'changeStatus']);
     Route::get('/categories', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
 
     // الدروس

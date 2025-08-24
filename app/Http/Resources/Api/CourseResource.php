@@ -4,6 +4,7 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Api\LessonResource;
 
 class CourseResource extends JsonResource
 {
@@ -38,7 +39,9 @@ class CourseResource extends JsonResource
                 ];
             }),
             'lessons_count' => $this->whenCounted('lessons', $this->lessons_count),
-            'lessons' => LessonResource::collection($this->whenLoaded('lessons')),
+            'lessons' => $this->whenLoaded('lessons', function () {
+                return LessonResource::collection($this->lessons);
+            }),
             'reviews_count' => $this->whenCounted('reviews', $this->reviews_count),
             'average_rating' => $this->whenLoaded('reviews', function () {
                 return $this->reviews->avg('rating') ?? 0;
