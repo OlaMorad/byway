@@ -16,8 +16,12 @@ return new class extends Migration
         Schema::create('lessons', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->text('description')->nullable(); // وصف الدرس
             $table->string('video_url');
-            $table->foreignId('course_id')->references('id')->on('courses')->cascadeOnDelete();
+            $table->integer('video_duration')->nullable(); // مدة الفيديو بالثواني
+            $table->json('materials')->nullable(); // المواد الإضافية (ملفات PDF، روابط، إلخ)
+            $table->integer('order')->default(0); // ترتيب الدرس في الكورس
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete("cascade");
             $table->timestamps();
         });
 

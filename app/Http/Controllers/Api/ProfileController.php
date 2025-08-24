@@ -27,6 +27,7 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
+                'image' => $user->image,
                 'headline' => $user->headline,
                 'about' => $user->about,
                 'twitter_link' => $user->twitter_link,
@@ -57,11 +58,13 @@ class ProfileController extends Controller
             'linkedin_link' => 'nullable|url',
             'youtube_link' => 'nullable|url',
             'facebook_link' => 'nullable|url',
+            'image' => 'nullable|string|max:2048',
         ]);
 
         // Update user profile
         $user->first_name = $request->first_name;
         $user->last_name = $request->last_name;
+        $user->image = $request->image;
         $user->headline = $request->headline;
         $user->about = $request->about;
         $user->twitter_link = $request->twitter_link;
@@ -76,6 +79,7 @@ class ProfileController extends Controller
                 'id' => $user->id,
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
+                'image' => $user->image,
                 'headline' => $user->headline,
                 'about' => $user->about,
                 'twitter_link' => $user->twitter_link,

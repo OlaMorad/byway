@@ -23,4 +23,9 @@ class ReportsController extends Controller
     {
         return $this->reportsService->coursesWithAvgRating();
     }
+    
+    public function downloadPdfReport()
+    {
+        return $this->reportsService->generateFullPdfReport();
+    }
 }

@@ -15,8 +15,8 @@ return new class extends Migration
 
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->references('id')->on('users')->cascadeOnDelete();
-            $table->foreignId('course_id')->references('id')->on('courses')->cascadeOnDelete();
+            $table->foreignId('user_id')->references('id')->on('users')->onDelete("cascade");
+            $table->foreignId('course_id')->references('id')->on('courses')->onDelete("cascade");
             $table->text('review');
             $table->integer('rating');
             $table->enum('status', ["Normal", "Reported"]);

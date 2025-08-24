@@ -15,12 +15,13 @@ return new class extends Migration
 
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained('users')->onDelete("cascade");
             $table->string('title');
             $table->text('description');
-            $table->string('video_url')->nullable();
-            $table->enum('status', ["published","pending"]);
-            $table->decimal('price');
+            $table->string('image_url')->nullable(); // صورة الكورس
+            $table->string('video_url')->nullable(); // فيديو الكورس
+            $table->enum('status', ["published","pending", "draft"])->default('draft');
+            $table->decimal('price', 10, 2);
             $table->foreignId('category_id')->references('id')->on('categories')->nullable()->onDelete('cascade');
             $table->timestamps();
         });
@@ -33,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('course');
+        Schema::dropIfExists('courses');
     }
 };

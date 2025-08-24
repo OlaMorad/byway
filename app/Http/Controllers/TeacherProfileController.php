@@ -5,14 +5,15 @@ namespace App\Http\Controllers;
 use App\Helpers\ApiResponse;
 use App\Models\InstructorProfile;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class TeacherProfileController extends Controller
 {
-    //  show profile
+
     public function show()
     {
-        $teacher = InstructorProfile::where('user_id', auth()->id())->first();
+        $teacher = InstructorProfile::where('user_id', auth()->id())
+            ->with('user')
+            ->first();
 
         if (!$teacher) {
             return ApiResponse::sendResponse(404, 'Teacher profile not found');
@@ -22,54 +23,61 @@ class TeacherProfileController extends Controller
     }
 
     // update profile
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         $data = $request->validate([
             'bio'            => 'sometimes|string|max:1000',
-            'total_earnings' => 'sometimes|numeric|min:0',
-            'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'name'           => 'sometimes|string|max:255',
             'twitter_link'   => 'nullable|url',
             'linkdin_link'   => 'nullable|url',
             'youtube_link'   => 'nullable|url',
             'facebook_link'  => 'nullable|url',
-            'name'           => 'required|string',
         ]);
 
-        $instructor = InstructorProfile::findOrFail($id);
+        $user = auth()->user();
+        $instructor = InstructorProfile::where('user_id', $user->id)->first();
 
-        // تأكيد أن المستخدم هو صاحب البروفايل
-        if ($instructor->user_id !== auth()->id()) {
-            return ApiResponse::sendResponse(403, 'Unauthorized to update this profile');
+        if (!$instructor) {
+            return ApiResponse::sendResponse(404, 'Profile not found');
         }
 
-        // لو فيه صورة جديدة
-        if ($request->hasFile('image')) {
-            if ($instructor->image && Storage::exists($instructor->image)) {
-                Storage::delete($instructor->image);
-            }
-            $data['image'] = $request->file('image')->store('instructor', 'public');
-                $instructor->update($data);
+        if (array_key_exists('name', $data)) {
+            $user->name = $data['name'];
+            $user->save();
+            unset($data['name']);
+        }
+
+        if (!empty($data)) {
+            $instructor->update($data);
+        }
+
+        $instructor->load('user');
 
         return ApiResponse::sendResponse(200, 'Profile updated successfully', $instructor);
-        }
     }
-    public function store(request $request){
-        $validated= $request->validate([
+
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
             'bio'            => 'required|string|max:1000',
-            // 'name'           => 'required|string|max:255',
-            'image'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'twitter_link'   => 'nullable|url',
-            'linkedin_link'  => 'nullable|url',
+            'linkdin_link'   => 'nullable|url',
             'youtube_link'   => 'nullable|url',
-            'facebook_link'  => 'nullable|url'
-
+            'facebook_link'  => 'nullable|url',
         ]);
-        if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('instructors', 'public');
-        }
-        $validated['user_id'] =$request->user()->id();
-        $profile = InstructorProfile::create($validated);
-        return ApiResponse::sendResponse(200, 'Profile created successfully', $profile);
 
+        $userId = auth()->id();
+
+        $existing = InstructorProfile::where('user_id', $userId)->first();
+        if ($existing) {
+            return ApiResponse::sendResponse(409, 'Profile already exists', $existing);
+        }
+
+        $validated['user_id'] = $userId;
+
+        $profile = InstructorProfile::create($validated)->load('user');
+
+        return ApiResponse::sendResponse(201, 'Profile created successfully', $profile);
     }
 }

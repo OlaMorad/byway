@@ -7,6 +7,9 @@ use App\Models\Course;
 use App\Models\Review;
 use App\Helpers\ApiResponse;
 use App\Models\Payment;
+use App\Models\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class ReportsService
 {
@@ -16,13 +19,21 @@ class ReportsService
         $instructorsCount = User::where('role', 'instructor')->count();
         $learnersCount = User::where('role', 'learner')->count();
         $coursesCount = Course::count();
-        $totalEarnings = Payment::sum('amount'); // مجموع المدفوعات
+
+        // جلب نسبة العمولة من جدول settings أو استخدم القيمة الافتراضية 15%
+        $commissionRate = Setting::first()->commission ?? 15.00;
+
+        // إجمالي المدفوعات
+        $totalPayments = Payment::where('type', 'payment')->sum('amount');
+
+        // ربح المنصة = إجمالي المدفوعات * نسبة العمولة
+        $platformEarnings = ($totalPayments * $commissionRate) / 100;
 
         $data = [
             'instructors' => $instructorsCount,
             'learners'    => $learnersCount,
             'courses'     => $coursesCount,
-            'earnings'    => round($totalEarnings, 2),
+            'earnings'    => round($platformEarnings, 2),
         ];
 
         return ApiResponse::sendResponse(200, 'General statistics retrieved successfully', $data);
@@ -44,5 +55,34 @@ class ReportsService
             ->values();
 
         return ApiResponse::sendResponse(200, 'Courses with average ratings retrieved successfully', $courses);
+    }
+
+    // دالة لإنشاء PDF واحد لكل التقارير
+    public function generateFullPdfReport()
+    {
+        // استخرج البيانات من JsonResponse
+        $generalStats = json_decode(json_encode($this->generalStatistics()->getData()->data), true);
+        $coursesStats = json_decode(json_encode($this->coursesWithAvgRating()->getData()->data), true);
+
+        // أنشئ PDF من البيانات
+        $pdf = Pdf::loadView('reports', [
+            'general' => $generalStats,
+            'courses' => $coursesStats,
+        ]);
+
+        // جيب آخر رقم إذا مخزّن، أو بلش من 1
+        $lastNumber = cache()->get('report_number', 0) + 1;
+
+        // خزّن الرقم الجديد للمرة الجاية
+        cache()->forever('report_number', $lastNumber);
+
+        // اسم الملف
+        $fileName = 'reports_' . $lastNumber . '.pdf';
+
+        // خزنه بالـ storage/public/reports
+        Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
+        $link = asset('public/storage/reports/' . $fileName);
+        // رجّع الرابط فقط بالـ data
+        return ApiResponse::sendResponse(200, 'Report as pdf generated successfully', $link);
     }
 }

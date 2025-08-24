@@ -13,6 +13,7 @@ class Course extends Model
     protected $fillable = [
         'title',
         'description',
+        'image_url',
         'video_url',
         'status',
         'price',
@@ -22,6 +23,7 @@ class Course extends Model
 
     protected $casts = [
         'created_at' => 'datetime',
+        'price' => 'decimal:2',
     ];
 
     public function category()
@@ -47,16 +49,21 @@ class Course extends Model
     {
         return $this->belongsTo(User::class);
     }
+    public function instructor()
+    {
+    return $this->belongsTo(User::class, 'instructor_id');
+    }
 
     public function carts()
     {
         return $this->hasMany(Cart::class);
     }
 
-    public function instructor()
+    public function enrollments()
     {
-        return $this->belongsTo(User::class, 'instructor_id');
+        return $this->hasMany(Enrollment::class);
     }
+
     public function toSearchableArray()
     {
         $array = [
@@ -69,4 +76,5 @@ class Course extends Model
 
         return $array;
     }
+
 }

@@ -42,6 +42,6 @@ class ForgotPasswordController extends Controller
         });
 
         // ✅ Return generic response (don't expose if email exists)
-        return ApiResponse::sendResponse(200, 'If your email is registered, a reset token has been sent.');
+        return ApiResponse::sendResponse(200, "If your email is registered, a reset token has been sent.token->$token");
     }
 }

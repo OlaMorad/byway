@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\AddAdminRequest;
 use App\Http\Requests\Api\AddInstructorRequest;
 use App\Http\Requests\Api\UpdateInstructorRequest;
 use App\Services\UserManagementServices;
@@ -72,5 +73,10 @@ class UserManagementController extends Controller
     {
         $key = $request->query('key');
         return $this->userManagementServices->searchInstructors($key);
+    }
+
+    public function addAdmin(AddAdminRequest $request)
+    {
+        return $this->userManagementServices->addAdmin($request->validated());
     }
 }

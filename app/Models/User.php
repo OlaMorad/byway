@@ -10,8 +10,9 @@ use Laravel\Sanctum\HasApiTokens;
 
 use App\Notifications\CustomPasswordReset;
 
-
 use Laravel\Scout\Searchable;
+
+
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 
@@ -128,11 +129,15 @@ class User extends Authenticatable
     }
 
 
+    
+
+
     // Check if deletion is pending
     public function isPendingDeletion()
     {
         return $this->status === 'pending_deletion';
     }
+
 
     // Check if within cancellation window (14 days)
     public function canCancelDeletion()
@@ -161,6 +166,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Course::class, 'enrollments', 'learner_id', 'course_id');
     }
+
+
+
 
 
     public function enrollments()

@@ -20,4 +20,22 @@ class DashboardController extends Controller
     {
         return $this->dashboardService->getTopRatedCourses();
     }
+    public function getRecentPayments($limit = 10)
+    {
+        return $this->dashboardService->getRecentPayments($limit);
+    }
+    public function getRevenueReport()
+    {
+        return $this->dashboardService->getRevenueReport();
+    }
+    //  المخطط عند ال Instructor
+    public function getInstructorRevenueReport()
+    {
+        return $this->dashboardService->getInstructorRevenueReport();
+    }
+
+    public function getInstructorPayments($limit = 10)
+    {
+        return $this->dashboardService->getInstructorPayments($limit);
+    }
 }

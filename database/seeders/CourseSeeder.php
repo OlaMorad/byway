@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
 use Illuminate\Database\Seeder;
 use App\Models\Course;
 
@@ -13,19 +15,37 @@ class CourseSeeder extends Seeder
      */
     public function run(): void
     {
-        $courses = [
-            ['title' => 'Web Development Basics', 'price' => 49.99,'user_id'=>1,'description'=>'lala','category_id'=>2],
-            ['title' => 'UI/UX Design', 'price' => 39.99,'user_id'=>1,'description'=>'lala','category_id'=>2],
-            ['title' => 'Python for Beginners', 'price' => 59.99,'user_id'=>1,'description'=>'lala','category_id'=>2],
-            ['title' => 'Mobile App Development', 'price' => 69.99,'user_id'=>1,'description'=>'lala','category_id'=>2],
-            ['title' => 'Data Science Intro', 'price' => 79.99,'user_id'=>1,'description'=>'lala','category_id'=>2],
-        ];
+        // نفترض عندك user_id = 1 و category_id = 1 (غيّرهم حسب البيانات اللي عندك)
+        $instructorId = 1;
 
-        foreach ($courses as $course) {
-            Course::firstOrCreate(
-                ['title' => $course['title']],
-                $course
-            );
-        }
+        Course::create([
+            'user_id' => $instructorId,
+            'title' => 'Laravel Basics',
+            'description' => 'Introduction to Laravel framework.',
+            'video_url' => 'https://example.com/videos/laravel-basics.mp4',
+            'status' => 'published',
+            'price' => 100,
+            'category_id' => 1,
+        ]);
+
+        Course::create([
+            'user_id' => $instructorId,
+            'title' => 'Advanced React',
+            'description' => 'Deep dive into React concepts.',
+            'video_url' => 'https://example.com/videos/advanced-react.mp4',
+            'status' => 'pending',
+            'price' => 200,
+            'category_id' => 2,
+        ]);
+
+        Course::create([
+            'user_id' => $instructorId,
+            'title' => 'Mobile Development with Flutter',
+            'description' => 'Learn to build cross-platform mobile apps.',
+            'video_url' => 'https://example.com/videos/flutter-course.mp4',
+            'status' => 'published',
+            'price' => 150,
+            'category_id' => 2,
+        ]);
     }
 }

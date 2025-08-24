@@ -21,6 +21,7 @@ class ReviewManagementServices
 
         $reviews = $reviewsQuery->get()->map(function ($review) {
             return [
+                'id'          => $review->id,
                 'course_name' => $review->course->title ?? null,
                 'reviewer'    => $review->user->name ?? null,
                 'rating'      => $review->rating,
@@ -45,7 +46,7 @@ class ReviewManagementServices
             'course'  => $review->course->title ?? null,
             'reviewer'     => $review->user->name ?? null,
             'comment'      => $review->review,
-            'Date'   => $review->created_at->format('Y:m:d'),
+            'date'   => $review->created_at->format('Y:m:d'),
         ];
 
         return ApiResponse::sendResponse(200, 'Review retrieved successfully', $reviewData);

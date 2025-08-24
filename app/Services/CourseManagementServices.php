@@ -44,7 +44,11 @@ class CourseManagementServices
     // الموافقة على كورس
     public function approveCourse($courseId)
     {
-        $course = Course::findOrFail($courseId);
+        $course = Course::find($courseId);
+
+        if (!$course) {
+            return ApiResponse::sendResponse(404, 'Course not found');
+        }
 
         if ($course->status === 'published') {
             return ApiResponse::sendResponse(200, 'Course is already published');
@@ -59,7 +63,13 @@ class CourseManagementServices
     // حذف كورس
     public function deleteCourse($courseId)
     {
-        Course::where('id', $courseId)->delete();
+        $course = Course::find($courseId);
+
+        if (!$course) {
+            return ApiResponse::sendResponse(404, 'Course not found');
+        }
+
+        $course->delete();
         return ApiResponse::sendResponse(200, 'Course deleted successfully');
     }
 
@@ -150,17 +160,20 @@ class CourseManagementServices
             ->query(function ($query) {
                 $query->with(['user:id,name', 'category:id,name']);
             })
-            ->get()
-            ->map(function ($course) {
-                return [
-                    'id'             => $course->id,
-                    'title'          => $course->title,
-                    'status'         => $course->status,
-                    'created_at'     => $course->created_at->format('Y:m:d'),
-                    'instructor_name' => $course->user->name ?? null,
-                    'category_name'  => $course->category->name ?? null,
-                ];
-            });
+            ->get();
+        if ($courses->isEmpty()) {
+            return ApiResponse::sendResponse(404, 'No courses found matching your search', []);
+        }
+        $courses = $courses->map(function ($course) {
+            return [
+                'id'             => $course->id,
+                'title'          => $course->title,
+                'status'         => $course->status,
+                'created_at'     => $course->created_at->format('Y:m:d'),
+                'instructor_name' => $course->user->name ?? null,
+                'category_name'  => $course->category->name ?? null,
+            ];
+        });
 
         return ApiResponse::sendResponse(200, 'Filtered courses retrieved successfully', $courses);
     }
