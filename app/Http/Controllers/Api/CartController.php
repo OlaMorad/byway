@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Helpers\ApiResponse;
 use App\Models\Cart;
+use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CartResourse;
 
 class CartController extends Controller
 {
     public function index(Request $request)
     {
         $items = Cart::with('course')->where('user_id', $request->user()->id)->get();
-        return ApiResponse::sendResponse(200, 'Cart items retrieved successfully', $items);
+        return ApiResponse::sendResponse(200, 'Cart items retrieved successfully', CartResourse::collection($items));
     }
 
     public function add(Request $request)
