@@ -87,6 +87,29 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
 });
 
+// =====================================================================
+// Course Management for Instructors
+// ===================================================================== 
+Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/course-management')->group(function () {
+    // الكورسات
+    Route::get('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'index']);
+    Route::get('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'show']);
+    Route::post('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'store']);
+    Route::put('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'update']);
+    Route::delete('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'destroy']);
+    Route::patch('/courses/{id}/status', [App\Http\Controllers\Api\CourseManagementController::class, 'changeStatus']);
+    Route::get('/categories', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
+    
+    // الدروس
+    Route::get('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'index']);
+    Route::get('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'show']);
+    Route::post('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'store']);
+    Route::put('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'update']);
+    Route::delete('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'destroy']);
+    Route::patch('/courses/{courseId}/lessons/reorder', [App\Http\Controllers\Api\LessonManagementController::class, 'reorder']);
+    Route::post('/courses/{courseId}/lessons/{lessonId}/materials', [App\Http\Controllers\Api\LessonManagementController::class, 'uploadMaterial']);
+});
+
 
 // =====================================================================
 // Dashboard

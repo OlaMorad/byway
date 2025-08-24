@@ -58,7 +58,7 @@ class ProfileController extends Controller
             'linkedin_link' => 'nullable|url',
             'youtube_link' => 'nullable|url',
             'facebook_link' => 'nullable|url',
-            'image' => 'nullable|string|max:65535',
+            'image' => 'nullable|string|max:2048',
         ]);
 
         // Update user profile
