@@ -3,18 +3,20 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\WithdrawalController;
+use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
@@ -22,18 +24,17 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\InstructorPublicController;
 use App\Http\Controllers\Api\InstructorStripeController;
-use App\Http\Controllers\Api\ReportsController;
+use App\Http\Controllers\Api\PlatformSettingsController;
 use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Api\InstructorRevenueController;
-use App\Http\Controllers\Api\TeacherNotificationController;
-use App\Http\Controllers\Api\Learner\CourseProgressController;
-use App\Http\Controllers\Api\Learner\CourseInteractionController;
-use App\Http\Controllers\Api\Learner\NotificationController;
-use App\Http\Controllers\Api\PaymentController;
-use App\Http\Controllers\Api\PlatformSettingsController;
-use App\Http\Controllers\Api\InstructorPublicController;
 use App\Http\Controllers\Api\Learner\EnrollmentController;
+use App\Http\Controllers\Api\TeacherNotificationController;
+use App\Http\Controllers\Api\Learner\NotificationController;
+use App\Http\Controllers\Api\Learner\CourseProgressController;
+use App\Http\Controllers\Api\LearnerPlatformAnalyticsController;
+use App\Http\Controllers\Api\Learner\CourseInteractionController;
 
 // =====================================================================
 // Public Instructor Routes (No Authentication Required)
@@ -218,6 +219,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Courses
     Route::get('/courses', [LearnerCourseController::class, 'index']);
+
+    //platform analytics
+    Route::get('/platform-analytics',LearnerPlatformAnalyticsController::class);
 
     // Favorites
     Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);
