@@ -85,10 +85,13 @@ class CourseController extends Controller
     // تعديل الكورس
     public function update(Request $request, $id)
     {
-        $course = Course::where('id', $id)
+$course = Course::where('id', $id)
             ->where('user_id', Auth::id())
-            ->firstOrFail();
+            ->first();
 
+        if (!$course) {
+            return ApiResponse::sendResponse(404 , 'Course not found');
+        }
         $validatedData = $request->validate([
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',

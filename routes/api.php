@@ -3,18 +3,20 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReportsController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Api\CourseShowController;
 use App\Http\Controllers\Api\WithdrawalController;
+use App\Http\Controllers\TeacherProfileController;
 use App\Http\Controllers\Api\LearnerCourseController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\PaymentHistoryController;
@@ -22,16 +24,17 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\InstructorPublicController;
 use App\Http\Controllers\Api\InstructorStripeController;
-use App\Http\Controllers\Api\ReportsController;
+use App\Http\Controllers\Api\PlatformSettingsController;
 use App\Http\Controllers\Api\ReviewManagementController;
 use App\Http\Controllers\Api\InstructorRevenueController;
+use App\Http\Controllers\Api\Learner\EnrollmentController;
 use App\Http\Controllers\Api\TeacherNotificationController;
-use App\Http\Controllers\Api\Learner\CourseProgressController;
-use App\Http\Controllers\Api\Learner\CourseInteractionController;
 use App\Http\Controllers\Api\Learner\NotificationController;
-use App\Http\Controllers\Api\PlatformSettingsController;
-use App\Http\Controllers\Api\InstructorPublicController;
+use App\Http\Controllers\Api\Learner\CourseProgressController;
+use App\Http\Controllers\Api\LearnerPlatformAnalyticsController;
+use App\Http\Controllers\Api\Learner\CourseInteractionController;
 
 // =====================================================================
 // Public Instructor Routes (No Authentication Required)
@@ -79,17 +82,17 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
 // =====================================================================
 // Courses
 // =====================================================================
-Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/courses', [CourseController::class, 'store']);
-    Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
-    Route::get('/instructor/courses/{id}',[CourseController::class,'show'])->middleware('role:instructor');
-    Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
-    Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
-});
+//Route::middleware('auth:sanctum')->group(function () {
+//    Route::post('/courses', [CourseController::class, 'store']);
+//    Route::get('/instructor/courses', [CourseController::class, 'listCourses'])->middleware('role:instructor');
+//    Route::get('/instructor/courses/{id}', [CourseController::class, 'show'])->middleware('role:instructor');
+//    Route::post('/instructor/courses/{id}', [CourseController::class, 'update'])->middleware('role:instructor');
+//    Route::delete('/instructor/courses/{id}', [CourseController::class, 'destroy'])->middleware('role:instructor');
+//});
 
 // =====================================================================
 // Course Management for Instructors
-// ===================================================================== 
+// =====================================================================
 Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/course-management')->group(function () {
     // الكورسات
     Route::get('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'index']);
@@ -99,7 +102,7 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::delete('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'destroy']);
     Route::patch('/courses/{id}/status', [App\Http\Controllers\Api\CourseManagementController::class, 'changeStatus']);
     Route::get('/categories', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
-    
+
     // الدروس
     Route::get('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'index']);
     Route::get('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'show']);
@@ -112,13 +115,15 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
 
 
 // =====================================================================
-// Dashboard
+// Admin Routes
 // =====================================================================
-Route::get('dashboard/statistics', [DashboardController::class, 'getDashboardStatistics']);
-Route::get('/dashboard/top-rated-courses', [DashboardController::class, 'getTopRatedCourses']);
+
+Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
+    Route::get('/instructor/revenue-report', [DashboardController::class, 'getInstructorRevenueReport']);
+});
 
 // =====================================================================
-// Admin Routes
+// Dashboard
 // =====================================================================
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Dashboard
@@ -148,7 +153,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Courses Management
     Route::prefix('courses')->group(function () {
         Route::get('/', [CourseManagementController::class, 'index']);
-        Route::get('/{id}', [CourseController::class, 'show']);
+        Route::get('/{id}', [CourseManagementController::class, 'show']);
         Route::put('/{courseId}', [CourseManagementController::class, 'update']);
         Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']);
         Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']);
@@ -183,7 +188,18 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::get('/courses', [ReportsController::class, 'coursesAvgRating']);
         Route::get('/download', [ReportsController::class, 'downloadPdfReport']);
     });
+
+    // Payment
+    Route::prefix('payments')->group(function () {
+        Route::get('/statistics', [PaymentController::class, 'statistics']);        // إحصائيات الدفعات
+        Route::get('/all', [PaymentController::class, 'allPayments']);             // كل الدفعات
+        Route::patch('/withdrawals/approve/{id}', [PaymentController::class, 'approveWithdrawal']); // الموافقة على سحب
+        Route::patch('/withdrawals/reject/{id}', [PaymentController::class, 'rejectWithdrawal']);   // رفض سحب
+        Route::get('/{id}', [PaymentController::class, 'show']);                   // تفاصيل دفع معينة
+    });
+
 });
+
 
 // =====================================================================
 // Cart
@@ -207,7 +223,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-Route::get('/instructor/revenue-analytics' , [InstructorRevenueController::class , 'analytics'])->middleware('auth:sanctum');
+Route::get('/instructor/revenue-analytics', [InstructorRevenueController::class, 'analytics'])->middleware('auth:sanctum');
 
 // =====================================================================
 // Notifications
@@ -226,6 +242,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Courses
     Route::get('/courses', [LearnerCourseController::class, 'index']);
+
+    //platform analytics
+    Route::get('/platform-analytics',LearnerPlatformAnalyticsController::class);
 
     // Favorites
     Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);
@@ -246,3 +265,15 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
 
 Route::get('/all-courses', [CourseShowController::class, 'index']);
 Route::get('/course/{id}', [CourseShowController::class, 'show']);
+
+
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Enroll in course
+    Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll']);
+
+    // My Courses
+    Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
+
+    // View one enrolled course
+    Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
+});

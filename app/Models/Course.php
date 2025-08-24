@@ -13,7 +13,6 @@ class Course extends Model
     protected $fillable = [
         'title',
         'description',
-        'image_url',
         'video_url',
         'status',
         'price',
@@ -23,7 +22,6 @@ class Course extends Model
 
     protected $casts = [
         'created_at' => 'datetime',
-        'price' => 'decimal:2',
     ];
 
     public function category()
@@ -33,7 +31,7 @@ class Course extends Model
 
     public function lessons()
     {
-        return $this->hasMany(Lesson::class)->orderBy('order');
+        return $this->hasMany(Lesson::class);
     }
 
     public function reviews()
@@ -45,25 +43,18 @@ class Course extends Model
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
-    
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
     public function instructor()
     {
-        return $this->belongsTo(User::class, 'user_id');
+    return $this->belongsTo(User::class, 'instructor_id');
     }
 
     public function carts()
     {
         return $this->hasMany(Cart::class);
-    }
-
-    public function enrollments()
-    {
-        return $this->hasMany(Enrollment::class);
     }
 
     public function toSearchableArray()
@@ -79,21 +70,4 @@ class Course extends Model
         return $array;
     }
 
-    // Scope للكورسات المنشورة
-    public function scopePublished($query)
-    {
-        return $query->where('status', 'published');
-    }
-
-    // Scope للكورسات المسودة
-    public function scopeDraft($query)
-    {
-        return $query->where('status', 'draft');
-    }
-
-    // Scope للكورسات المعلقة
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
 }

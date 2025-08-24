@@ -160,17 +160,20 @@ class CourseManagementServices
             ->query(function ($query) {
                 $query->with(['user:id,name', 'category:id,name']);
             })
-            ->get()
-            ->map(function ($course) {
-                return [
-                    'id'             => $course->id,
-                    'title'          => $course->title,
-                    'status'         => $course->status,
-                    'created_at'     => $course->created_at->format('Y:m:d'),
-                    'instructor_name' => $course->user->name ?? null,
-                    'category_name'  => $course->category->name ?? null,
-                ];
-            });
+            ->get();
+        if ($courses->isEmpty()) {
+            return ApiResponse::sendResponse(404, 'No courses found matching your search', []);
+        }
+        $courses = $courses->map(function ($course) {
+            return [
+                'id'             => $course->id,
+                'title'          => $course->title,
+                'status'         => $course->status,
+                'created_at'     => $course->created_at->format('Y:m:d'),
+                'instructor_name' => $course->user->name ?? null,
+                'category_name'  => $course->category->name ?? null,
+            ];
+        });
 
         return ApiResponse::sendResponse(200, 'Filtered courses retrieved successfully', $courses);
     }

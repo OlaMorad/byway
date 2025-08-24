@@ -24,15 +24,14 @@ class WithdrawalRequest extends FormRequest
     {
         $minWithdrawal = Setting::value('withdrawal') ?? 50.00;
 
-       
+
         return [
             'payment_method' => 'required|string',
-            'account_name'   => 'required|string|min:3|max:100',
-            'account_number' => 'required|numeric',
-            'bank_name'      => 'required|string|min:3|max:100',
-            'amount' => "required|numeric|min:{$minWithdrawal}",
-
-
+            'account_name'   => 'required|string',
+            'account_number' => 'required_if:payment_method,bank|nullable|numeric',
+            'bank_name'      => 'required_if:payment_method,bank|nullable|string',
+            'amount'         => "required|numeric|min:{$minWithdrawal}",
+            'email'          => 'required_unless:payment_method,bank|nullable|email',
         ];
     }
 }

@@ -14,6 +14,10 @@ class Payment extends Model
     protected $guarded = ['id'];
     protected $table = 'payments';
 
+    protected $casts = [
+        'response_payload' => 'array',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -23,4 +27,8 @@ class Payment extends Model
         return $this->hasOne(Order::class);
     }
 
+    public function userPaymentMethod()
+    {
+        return $this->hasOne(PaymentMethod::class, 'user_id', 'user_id');
+    }
 }
