@@ -31,7 +31,7 @@ class LessonCollection extends ResourceCollection
     private function formatTotalDuration(int $seconds): string
     {
         if ($seconds <= 0) {
-            return 'Undefined';
+            return 'Not specified';
         }
 
         $hours = floor($seconds / 3600);

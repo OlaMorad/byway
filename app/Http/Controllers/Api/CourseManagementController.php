@@ -90,7 +90,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء الكورس بنجاح',
+            'message' => 'The course has been created successfully.',
             'data' => $course->load('category')
         ], 201);
     }
@@ -128,7 +128,7 @@ class CourseManagementController extends Controller
                 $oldImagePath = str_replace('/storage/', '', $course->image_url);
                 Storage::disk('public')->delete($oldImagePath);
             }
-            
+
             $imagePath = $request->file('image')->store('courses/images', 'public');
             $course->image_url = Storage::url($imagePath);
         }
@@ -140,7 +140,7 @@ class CourseManagementController extends Controller
                 $oldVideoPath = str_replace('/storage/', '', $course->video_url);
                 Storage::disk('public')->delete($oldVideoPath);
             }
-            
+
             $videoPath = $request->file('video')->store('courses/videos', 'public');
             $course->video_url = Storage::url($videoPath);
         }
@@ -149,7 +149,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الكورس بنجاح',
+            'message' => 'The course has been updated successfully.',
             'data' => $course->load('category')
         ]);
     }
@@ -176,7 +176,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الكورس بنجاح'
+            'message' => 'The course has been successfully deleted.'
         ]);
     }
 
@@ -202,7 +202,7 @@ class CourseManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تغيير حالة الكورس بنجاح',
+            'message' => 'The course status has been changed successfully.',
             'data' => $course
         ]);
     }
@@ -213,7 +213,7 @@ class CourseManagementController extends Controller
     public function getCategories()
     {
         $categories = Category::all();
-        
+
         return response()->json([
             'success' => true,
             'data' => $categories

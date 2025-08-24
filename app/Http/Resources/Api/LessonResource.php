@@ -18,7 +18,7 @@ class LessonResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'video_url' => $this->video_url,
+            'video_url' => $this->video_url ? url($this->video_url) : null,
             'video_duration' => $this->video_duration,
             'formatted_duration' => $this->formatted_duration,
             'materials' => $this->materials_array,
@@ -34,21 +34,21 @@ class LessonResource extends JsonResource
             'completion_status' => $this->when($request->user(), function () {
                 $user = $request->user();
                 if (!$user) return null;
-                
+
                 $completion = $this->lessonCompletions()
                     ->where('user_id', $user->id)
                     ->first();
-                
-                return $completion ? 'completed' : 'not_started';
+
+                return $completion ? 'Completed' : 'Not Started';
             }),
             'completion_date' => $this->when($request->user(), function () {
                 $user = $request->user();
                 if (!$user) return null;
-                
+
                 $completion = $this->lessonCompletions()
                     ->where('user_id', $user->id)
                     ->first();
-                
+
                 return $completion?->created_at?->format('Y-m-d H:i:s');
             }),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),

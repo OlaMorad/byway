@@ -18,10 +18,10 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'image_url' => $this->image_url,
-            'video_url' => $this->video_url,
+            'image_url' => $this->image_url ? url($this->image_url) : null,
+            'video_url' => $this->video_url ? url($this->video_url) : null,
             'status' => $this->status,
-            'status_text' => $this->status,
+            'status_text' => $this->getStatusText(),
             'price' => $this->price,
             'formatted_price' => $this->formatted_price,
             'category' => $this->whenLoaded('category', function () {
@@ -51,7 +51,20 @@ class CourseResource extends JsonResource
 
 
     /**
-     * تنسيق السعر
+     * Get status text in English
+     */
+    private function getStatusText(): string
+    {
+        return match($this->status) {
+            'draft' => 'Draft',
+            'pending' => 'Pending Review',
+            'published' => 'Published',
+            default => 'Unknown'
+        };
+    }
+
+    /**
+     * Format price
      */
     public function getFormattedPriceAttribute(): string
     {

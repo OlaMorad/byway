@@ -21,7 +21,7 @@ class LessonManagementController extends Controller
     {
         // التأكد من أن المدرس يملك هذا الكورس
         $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-        
+
         $lessons = $course->lessons()->orderBy('order')->get();
 
         return new LessonCollection($lessons);
@@ -34,7 +34,7 @@ class LessonManagementController extends Controller
     {
         // التأكد من أن المدرس يملك هذا الكورس
         $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-        
+
         $lesson = $course->lessons()->findOrFail($lessonId);
 
         return new LessonResource($lesson);
@@ -85,7 +85,7 @@ class LessonManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم إنشاء الدرس بنجاح',
+            'message' => 'The lesson was created successfully.',
             'data' => new LessonResource($lesson)
         ], 201);
     }
@@ -97,7 +97,7 @@ class LessonManagementController extends Controller
     {
         // التأكد من أن المدرس يملك هذا الكورس
         $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-        
+
         $lesson = $course->lessons()->findOrFail($lessonId);
 
         $validator = Validator::make($request->all(), [
@@ -128,7 +128,7 @@ class LessonManagementController extends Controller
                 $oldVideoPath = str_replace('/storage/', '', $lesson->video_url);
                 Storage::disk('public')->delete($oldVideoPath);
             }
-            
+
             $videoPath = $request->file('video')->store('lessons/videos', 'public');
             $lesson->video_url = Storage::url($videoPath);
         }
@@ -137,7 +137,7 @@ class LessonManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تحديث الدرس بنجاح',
+            'message' => 'The lesson has been updated successfully.',
             'data' => new LessonResource($lesson)
         ]);
     }
@@ -149,7 +149,7 @@ class LessonManagementController extends Controller
     {
         // التأكد من أن المدرس يملك هذا الكورس
         $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-        
+
         $lesson = $course->lessons()->findOrFail($lessonId);
 
         // حذف فيديو الدرس
@@ -165,7 +165,7 @@ class LessonManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم حذف الدرس بنجاح'
+            'message' => 'The lesson was successfully deleted.'
         ]);
     }
 
@@ -200,7 +200,7 @@ class LessonManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم تغيير ترتيب الدروس بنجاح'
+            'message' => 'The order of the lessons has been changed successfully.'
         ]);
     }
 
@@ -210,7 +210,7 @@ class LessonManagementController extends Controller
     private function reorderLessons($courseId)
     {
         $lessons = Lesson::where('course_id', $courseId)->orderBy('order')->get();
-        
+
         foreach ($lessons as $index => $lesson) {
             $lesson->order = $index;
             $lesson->save();
@@ -224,7 +224,7 @@ class LessonManagementController extends Controller
     {
         // التأكد من أن المدرس يملك هذا الكورس
         $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-        
+
         $lesson = $course->lessons()->findOrFail($lessonId);
 
         $validator = Validator::make($request->all(), [
@@ -257,7 +257,7 @@ class LessonManagementController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'تم رفع المادة الإضافية بنجاح',
+            'message' => 'The additional material has been uploaded successfully.',
             'data' => new LessonResource($lesson)
         ]);
     }
