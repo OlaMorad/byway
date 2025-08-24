@@ -35,6 +35,7 @@ class InstructorRevenueController extends Controller
             ->latest()
             ->first();
 
-        return ApiResponse::sendResponse(200, 'Revenue analytics retrieved successfully', ['total_profits' => round($totalProfits), 'available_balance' => round($availableBalance), 'last_transaction' => round($lastTransaction->amount ?? null)]);
+        return ApiResponse::sendResponse(200, 'Revenue analytics retrieved successfully', ['total_profits' => round($totalProfits), 'available_balance' => round($availableBalance), 'last_transaction' => round($lastTransaction->amount ?? null) 
+        , 'minimum_withdrawal' => Setting::value('withdrawal') ?? 100]);
     }
 }
