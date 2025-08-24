@@ -18,7 +18,7 @@ class LessonResource extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'description' => $this->description,
-            'video_url' => $this->video_url ? url($this->video_url) : null,
+            'video_url' => $this->video_url ? url("public/" . $this->video_url) : null,
             'video_duration' => $this->video_duration,
             'formatted_duration' => $this->formatted_duration,
             'materials' => $this->materials_array,
