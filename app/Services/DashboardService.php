@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\Payment;
 use App\Models\Setting;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
@@ -55,20 +56,45 @@ class DashboardService
     public function getRecentPayments($limit = 10)
     {
         // جلب آخر المدفوعات مع علاقة اليوزر وطرق الدفع
-        $payments = Payment::with('user.paymentMethods')
-            ->latest()
+        $payments = Payment::latest()
             ->take($limit)
             ->get()
             ->map(function ($payment) {
+                $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
                 return [
                     'customer' => $payment->user->name ?? null,
                     'date'          => $payment->created_at->format('Y-m-d'),
-                    'type'          => $payment->paymentMethod?->brand ?? null,
+                    'method'   => $payload['payment_method'] ?? null,
                     'amount'        => (float) $payment->amount,
                 ];
             });
 
         return ApiResponse::sendResponse(200, 'Recent payments retrieved successfully', $payments);
+    }
+
+
+    public function getInstructorPayments($limit = 10)
+    {
+        $instructorId = Auth::id();
+
+        $payments = Payment::whereHas('order.items.course', function ($query) use ($instructorId) {
+            $query->where('user_id', $instructorId);
+        })
+            ->with(['user'])
+            ->latest()
+            ->take($limit)
+            ->get()
+            ->map(function ($payment) {
+                $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+                return [
+                    'customer' => $payment->user->name ?? null,
+                    'date'     => $payment->created_at->format('Y-m-d'),
+                    'type' => $payload['payment_method'] ?? null,
+                    'amount'   => (float) $payment->amount,
+                ];
+            });
+
+        return ApiResponse::sendResponse(200, 'Instructor payments retrieved successfully', $payments);
     }
 
 
@@ -114,29 +140,24 @@ class DashboardService
         return ApiResponse::sendResponse(200, 'Revenue report retrieved successfully', $result);
     }
 
-
     public function getInstructorRevenueReport()
     {
         $currentYear = Carbon::now()->year;
         $startYear = $currentYear - 4 + 1; // آخر 3 سنين + السنة الحالية
+        $instructorId = Auth::id(); // المستخدم الحالي
 
         // نسبة العمولة من جدول settings أو القيمة الافتراضية 15%
         $commissionRate = Setting::first()->commission ?? 15.00;
 
-        // جلب كل عمليات السحب (withdrawal) ضمن السنوات المطلوبة
-        $withdrawals = Payment::selectRaw('
-            YEAR(created_at) as year,
-            MONTH(created_at) as month,
-            SUM(amount) as total_withdrawals
-        ')
-            ->where('type', 'withdrawal')
-            ->where('status', 'succeeded') // نتأكد انه Approved
+        // جلب كل عمليات السحب للمدرس الحالي
+        $withdrawals = Payment::where('type', 'withdrawal')
+            ->where('status', 'succeeded')
+            ->where('user_id', $instructorId) // فقط السحوبات الخاصة بالمدرس
             ->whereBetween(DB::raw('YEAR(created_at)'), [$startYear, $currentYear])
-            ->groupBy('year', 'month')
-            ->orderBy('year', 'desc')
-            ->orderBy('month', 'asc')
             ->get()
-            ->keyBy(fn($item) => $item->year . '-' . $item->month);
+            ->groupBy(function ($payment) {
+                return $payment->created_at->format('Y-m');
+            });
 
         $result = [];
 
@@ -144,9 +165,11 @@ class DashboardService
             $result[$year] = [];
 
             for ($month = 1; $month <= 12; $month++) {
-                $key = $year . '-' . $month;
+                $key = sprintf('%d-%02d', $year, $month);
 
-                $withdrawalAmount = isset($withdrawals[$key]) ? (float) $withdrawals[$key]->total_withdrawals : 0;
+                $withdrawalAmount = isset($withdrawals[$key])
+                    ? $withdrawals[$key]->sum('amount')
+                    : 0;
 
                 // خصم عمولة المنصة
                 $instructorRevenue = $withdrawalAmount - (($withdrawalAmount * $commissionRate) / 100);
@@ -154,7 +177,7 @@ class DashboardService
                 $result[$year][] = [
                     'month' => date('M', mktime(0, 0, 0, $month, 1)),
                     'revenue' => round($instructorRevenue, 2),
-                    'date' => $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT),
+                    'date' => $key,
                 ];
             }
         }
