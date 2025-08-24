@@ -120,6 +120,7 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
 
 Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
     Route::get('/instructor/revenue-report', [DashboardController::class, 'getInstructorRevenueReport']);
+    Route::get('/instructor/payments', [DashboardController::class, 'getInstructorPayments']);
 });
 
 // =====================================================================
@@ -142,6 +143,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::patch('/toggle-status/{id}', [UserManagementController::class, 'toggleStatus']);
         Route::patch('/{userId}', [UserManagementController::class, 'updateUser']);
         Route::delete('/{id}', [UserManagementController::class, 'destroy']);
+        Route::post('/add/admin', [UserManagementController::class, 'addAdmin']);
     });
 
     // Instructors

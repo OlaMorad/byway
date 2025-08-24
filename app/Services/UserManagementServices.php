@@ -77,7 +77,7 @@ class UserManagementServices
         $users = User::search($key)->get();
 
         $filteredUsers = $users->where('role', '!=', 'admin');
-        
+
         if (in_array(strtolower($key), ['learner', 'instructor'])) {
             $filteredUsers = $filteredUsers->where('role', strtolower($key));
         }
@@ -249,5 +249,18 @@ class UserManagementServices
             })->values();
 
         return ApiResponse::sendResponse(200, 'instructors search results retrieved successfully', $filteredUsers);
+    }
+
+    public function addAdmin(array $data)
+    {
+        User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role'     => 'admin',
+            'status'   => 'Active',
+        ]);
+
+        return ApiResponse::sendResponse(201, 'Admin added successfully');
     }
 }
