@@ -12,6 +12,8 @@ use Illuminate\Database\Seeder;
 use Database\Factories\ReviewFactory;
 use Illuminate\Support\Facades\Hash;
 use Database\Seeders\FavoritesTableSeeder;
+use Database\Seeders\InstructorProfileSeeder;
+use Database\Seeders\PaymentSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -36,10 +38,13 @@ class DatabaseSeeder extends Seeder
         Lesson::factory(50)->create();
         Review::factory(50)->create();
 
-    $this->call([
-        UserSeeder::class,
-        CourseSeeder::class,
-        FavoritesCartSeeder::class,
-    ]);
+        $this->call([
+            InstructorProfileSeeder::class,
+            UserSeeder::class,
+            PaymentSeeder::class,
+            CourseSeeder::class,
+            FavoritesCartSeeder::class,
+            NotificationSeeder::class,
+        ]);
     }
 }

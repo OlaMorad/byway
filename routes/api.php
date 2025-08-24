@@ -30,6 +30,17 @@ use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\PlatformSettingsController;
 
+
+// =====================================================================
+// Public Instructor Routes (No Authentication Required)
+// =====================================================================
+Route::get('/all-instructors', [InstructorPublicController::class, 'index']);
+Route::get('/all-instructors/{id}', [InstructorPublicController::class, 'show']);
+
+// =====================================================================
+// Auth & User
+// =====================================================================
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -240,4 +251,6 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Delete notification
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 });
+
+
 
