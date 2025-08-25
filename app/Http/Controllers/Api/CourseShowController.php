@@ -22,6 +22,17 @@ class CourseShowController extends Controller
         ->withCount(['lessons', 'reviews'])
         ->where('status', 'published');
 
+        // Check if user is authenticated
+        $user = $request->user();
+        $isAuthenticated = $user !== null;
+        
+        // If user is authenticated, get their favorite course IDs for efficient checking
+        $favoriteCourseIds = collect();
+        if ($isAuthenticated) {
+            $favoriteCourseIds = \App\Models\Favorite::where('user_id', $user->id)
+                ->pluck('course_id');
+        }
+
         if ($request->has('search') && $request->search !== null && $request->search !== '') {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -47,7 +58,10 @@ class CourseShowController extends Controller
         $courses = $query->paginate($perPage);
 
         // Transform courses to include image and video URLs with full paths
-        $transformedCourses = $courses->getCollection()->map(function ($course) {
+        $transformedCourses = $courses->getCollection()->map(function ($course) use ($user, $isAuthenticated, $favoriteCourseIds) {
+            // Check if course is in user's favorites
+            $isFavorite = $isAuthenticated && $favoriteCourseIds->contains($course->id);
+
             return [
                 'id' => $course->id,
                 'title' => $course->title,
@@ -58,6 +72,7 @@ class CourseShowController extends Controller
                 'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
                 'lessons_count' => $course->lessons_count ?? 0,
                 'reviews_count' => $course->reviews_count ?? 0,
+                'is_favorite' => $isFavorite,
                 'category' => [
                     'id' => $course->category?->id,
                     'name' => $course->category?->name,
@@ -91,7 +106,7 @@ class CourseShowController extends Controller
     /**
      * Get details of a specific course
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $course = Course::with([
             'user:id,name,about,image', // instructor
@@ -104,6 +119,17 @@ class CourseShowController extends Controller
             return ApiResponse::sendError('Course not found.', 404);
         }
 
+        // Check if user is authenticated and if course is in favorites
+        $user = $request->user();
+        $isAuthenticated = $user !== null;
+        $isFavorite = false;
+        
+        if ($isAuthenticated) {
+            $isFavorite = \App\Models\Favorite::where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->exists();
+        }
+
         // Format response
         return ApiResponse::sendResponse(200, 'Course details retrieved.', [
             'id' => $course->id,
@@ -113,6 +139,7 @@ class CourseShowController extends Controller
             'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
             'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
             'status' => $course->status,
+            'is_favorite' => $isFavorite,
             'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
 
