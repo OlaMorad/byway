@@ -177,7 +177,7 @@ class EnrollmentController extends Controller
                     'id' => $course->instructor?->id ?? 0,
                     'name' => $course->instructor?->name ?? 'Unknown Instructor',
                     'bio' => $course->instructor?->bio ?? 'No bio available',
-                    'profile_photo' => $course->instructor?->profile_photo ? url('storage/' . $course->instructor->profile_photo) : null,
+                    'profile_photo' => $course->instructor?->image ? url('storage/' . $course->instructor->image) : null,
                 ],
                 'content' => $course->lessons->sortBy('order')->map(function ($lesson) {
                     return [
@@ -190,6 +190,7 @@ class EnrollmentController extends Controller
                 'reviews' => $course->reviews->map(function ($review) {
                     return [
                         'rating' => $review->rating,
+                        'user_image' => $review->user?->image,
                         'review' => $review->review,
                         'learner_name' => $review->user?->name ?? 'Unknown User',
                         'created_at' => $review->created_at->diffForHumans(),

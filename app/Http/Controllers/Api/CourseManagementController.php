@@ -17,12 +17,17 @@ class CourseManagementController extends Controller
     /**
      * عرض جميع كورسات المدرس
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Get pagination parameters
+        $perPage = $request->get('per_page', 15);
+        $page = $request->get('page', 1);
+
         $courses = Course::where('user_id', Auth::id())
             ->with(['category', 'lessons'])
+            ->withCount(['lessons', 'reviews', 'enrollments'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
@@ -39,6 +44,7 @@ class CourseManagementController extends Controller
             ->with(['category', 'lessons' => function($query) {
                 $query->orderBy('order');
             }])
+            ->withCount(['lessons', 'reviews', 'enrollments'])
             ->findOrFail($id);
 
         return response()->json([
@@ -184,15 +190,28 @@ class CourseManagementController extends Controller
 
 
     /**
-     * الحصول على الفئات المتاحة
+     * الحصول على الفئات المتاحة مع عدد الكورسات في كل فئة
      */
     public function getCategories()
     {
-        $categories = Category::all();
+        $categories = Category::withCount('courses')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'courses_count' => $category->courses_count,
+                    'created_at' => $category->created_at?->format('Y-m-d H:i:s'),
+                    'updated_at' => $category->updated_at?->format('Y-m-d H:i:s'),
+                ];
+            });
 
         return response()->json([
             'success' => true,
-            'data' => $categories
+            'data' => $categories,
+            'total_categories' => $categories->count(),
+            'total_courses' => $categories->sum('courses_count'),
         ]);
     }
 }
