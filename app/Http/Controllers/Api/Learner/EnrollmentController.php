@@ -140,6 +140,10 @@ class EnrollmentController extends Controller
 
             $userId = $request->user()->id;
 
+            if (!$request->user() || $request->user()->role !== 'learner') {
+                return ApiResponse::sendError('Unauthorized. Only learners can access this.', 403);
+            }
+
             // Check enrollment
             $isEnrolled = Enrollment::where('learner_id', $userId)
                 ->where('course_id', $courseId)
