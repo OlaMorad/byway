@@ -269,4 +269,13 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // View one enrolled course
     Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
 });
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    // Get all notifications
+    Route::get('/notifications', [NotificationController::class, 'index']);
 
+    // Mark as read
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+    // Delete notification
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+});
