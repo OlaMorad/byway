@@ -54,8 +54,8 @@ class CourseShowController extends Controller
                 'description' => $course->description,
                 'price' => $course->price,
                 'status' => $course->status,
-                'image_url' => $course->image_url ? url('public/storage/' . $course->image_url) : null,
-                'video_url' => $course->video_url ? url('public/storage/' . $course->video_url) : null,
+                'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
+                'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
                 'lessons_count' => $course->lessons_count ?? 0,
                 'reviews_count' => $course->reviews_count ?? 0,
                 'category' => [
@@ -65,7 +65,7 @@ class CourseShowController extends Controller
                 'instructor' => [
                     'id' => $course->user?->id,
                     'name' => $course->user?->name,
-                    'image' => $course->user?->image ? url('public/storage/' . $course->user->image) : null,
+                    'image' => $course->user?->image ? url('public/' . $course->user->image) : null,
                 ],
                 'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
                 'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
@@ -110,8 +110,8 @@ class CourseShowController extends Controller
             'title' => $course->title,
             'description' => $course->description,
             'price' => $course->price,
-            'image_url' => $course->image_url ? url('public/storage/' . $course->image_url) : null,
-            'video_url' => $course->video_url ? url('public/storage/' . $course->video_url) : null,
+            'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
+            'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
             'status' => $course->status,
             'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
@@ -120,7 +120,7 @@ class CourseShowController extends Controller
                 'id' => $course->user?->id,
                 'name' => $course->user?->name,
                 'about' => $course->user?->about ?? 'No bio available',
-                'image' => $course->user?->image ? url('public/storage/' . $course->user->image) : null,
+                'image' => $course->user?->image ? url('public/' . $course->user->image) : null,
             ],
 
             'content' => $course->lessons->map(function ($lesson) {
