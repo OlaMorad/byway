@@ -42,7 +42,6 @@ class PaymentManagementService
             ->paginate(10);
 
         $payments->getCollection()->transform(function ($payment) {
-        $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
             return [
                 'id' => $payment->id,
                 'date' => $payment->created_at->format('Y-m-d'),
@@ -50,7 +49,7 @@ class PaymentManagementService
                 'type' => $payment->type,
                 'amount' => (float) $payment->amount,
                 'status' => $payment->status,
-                'payment_method' => $payload['payment_method'] ?? null,
+                'payment_method' => $payment->userPaymentMethod?->brand ?? null, 
             ];
         });
 
@@ -87,15 +86,11 @@ class PaymentManagementService
 
     public function getPaymentDetailsById(int $id)
     {
-        $payment = Payment::with(['user', 'order.orderItems.course'])->find($id);
+        $payment = Payment::with(['user', 'user.paymentMethods'])->find($id);
 
         if (!$payment) {
             return ApiResponse::sendResponse(404, 'Payment not found');
         }
-        // استخرج الداتا من البيلود
-        $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
-
-        $method = $payload['payment_method'] ?? null;
 
         // لو النوع withdrawal
         if ($payment->type === 'withdrawal') {
@@ -103,32 +98,22 @@ class PaymentManagementService
                 'instructor' => $payment->user?->name,
                 'request_date' => $payment->created_at->format('Y-m-d'),
                 'amount'       => (float) $payment->amount,
-                'method'       => $method,
+                'method'       => $payment->user?->paymentMethods->first()?->brand,
                 'status'       => $payment->status,
             ];
-            // إذا الميثود بنك → رجع معلومات إضافية
-            if ($method === 'bank') {
-                $data['account_number'] = $payload['account_number'] ?? null;
-                $data['bank_name']      = $payload['bank_name'] ?? null;
-            }
         }
 
         // لو النوع payment
         elseif ($payment->type === 'payment') {
 
-            // جمع كل الكورسات من كل الأوردرات المرتبطة بهذا الدفع
-            $courses = collect($payment->orders) 
-                ->flatMap(fn($order) => collect($order->items)->map(fn($item) => $item->course?->title))
-                ->filter()
-                ->unique()
-                ->values()
-                ->all();
+            // جيب أول كورس مرتبط مع اليوزر
+            $course = $payment->user?->courses()->first();
 
             $data = [
                 'student'      => $payment->user?->name,
                 'payment_date' => $payment->created_at->format('Y-m-d'),
-                'course'       => $courses,
-                'method'       => $method,
+                'course'       => $course?->title, // لاحظ السؤال هون
+                'method'       => $payment->user?->paymentMethods->first()?->brand,
                 'amount'       => (float) $payment->amount,
                 'status'       => $payment->status,
             ];
