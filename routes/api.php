@@ -267,6 +267,6 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
 
     // View one enrolled course
-    Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
+    Route::get('/courses/{courseId}/enrolled', [EnrollmentController::class, 'showEnrolledCourse']);
 });
 
