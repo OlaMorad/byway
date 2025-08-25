@@ -260,6 +260,10 @@ Route::get('/course/{id}', [CourseShowController::class, 'show']);
 
 
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+
     // Enroll in course
     Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll']);
 
@@ -269,4 +273,3 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // View one enrolled course
     Route::get('/courses/{courseId}/enrolled', [EnrollmentController::class, 'showEnrolledCourse']);
 });
-
