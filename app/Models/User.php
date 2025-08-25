@@ -111,6 +111,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Course::class, 'favorites')->withTimestamps();
     }
 
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
 
     public function paymentMethods()
     {

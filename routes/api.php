@@ -108,7 +108,6 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::post('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'store']);
     Route::put('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'update']);
     Route::delete('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'destroy']);
-    Route::patch('/courses/{courseId}/lessons/reorder', [App\Http\Controllers\Api\LessonManagementController::class, 'reorder']);
     Route::post('/courses/{courseId}/lessons/{lessonId}/materials', [App\Http\Controllers\Api\LessonManagementController::class, 'uploadMaterial']);
 });
 
@@ -243,6 +242,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Courses
     Route::get('/courses', [LearnerCourseController::class, 'index']);
+    Route::get('/courses/{courseId}/progress', [LearnerCourseController::class, 'getCourseProgress']);
 
     //platform analytics
     Route::get('/platform-analytics',LearnerPlatformAnalyticsController::class);

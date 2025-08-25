@@ -169,40 +169,6 @@ class LessonManagementController extends Controller
         ]);
     }
 
-    /**
-     * تغيير ترتيب الدروس
-     */
-    public function reorder(Request $request, $courseId)
-    {
-        // التأكد من أن المدرس يملك هذا الكورس
-        $course = Course::where('user_id', Auth::id())->findOrFail($courseId);
-
-        $validator = Validator::make($request->all(), [
-            'lesson_orders' => 'required|array',
-            'lesson_orders.*.id' => 'required|exists:lessons,id',
-            'lesson_orders.*.order' => 'required|integer|min:0',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        foreach ($request->lesson_orders as $item) {
-            $lesson = $course->lessons()->find($item['id']);
-            if ($lesson) {
-                $lesson->order = $item['order'];
-                $lesson->save();
-            }
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'The order of the lessons has been changed successfully.'
-        ]);
-    }
 
     /**
      * إعادة ترتيب الدروس تلقائياً
