@@ -12,6 +12,10 @@ use Database\Seeders\FavoritesCartSeeder;
 use Illuminate\Database\Seeder;
 use Database\Factories\ReviewFactory;
 use Illuminate\Support\Facades\Hash;
+use Database\Seeders\FavoritesTableSeeder;
+use Database\Seeders\InstructorProfileSeeder;
+use Database\Seeders\PaymentSeeder;
+
 
 class DatabaseSeeder extends Seeder
 {
@@ -42,8 +46,11 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             PaymentSeeder::class,
             CourseSeeder::class,
+            FavoritesCartSeeder::class,
+            NotificationSeeder::class,
             OrderSeeder::class,
             FavoritesCartSeeder::class,
+
         ]);
     }
 }

@@ -36,15 +36,6 @@ use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\LearnerPlatformAnalyticsController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
 
-// =====================================================================
-// Public Instructor Routes (No Authentication Required)
-// =====================================================================
-Route::get('/all-instructors', [InstructorPublicController::class, 'index']);
-Route::get('/all-instructors/{id}', [InstructorPublicController::class, 'show']);
-
-// =====================================================================
-// Auth & User
-// =====================================================================
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -278,3 +269,4 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // View one enrolled course
     Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
 });
+
