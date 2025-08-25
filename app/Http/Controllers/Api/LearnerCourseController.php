@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use App\Helpers\ApiResponse;
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Favorite;
 use App\Models\Lesson;
 use App\Models\LessonCompletion;
@@ -137,13 +138,15 @@ class LearnerCourseController extends Controller
                 return ApiResponse::sendError('Course not found', 404);
             }
 
-            // Check if user has favorited this course
-            $isFavorited = Favorite::where('user_id', $user->id)
+            // Check if user has access to this course (either enrolled or favorited)
+            $isEnrolled = Enrollment::where('learner_id', $user->id)
                 ->where('course_id', $courseId)
                 ->exists();
 
-            if (!$isFavorited) {
-                return ApiResponse::sendError('Course not in favorites', 403);
+
+
+            if (!$isEnrolled) {
+                return ApiResponse::sendError('You do not have access to this course. Please enroll or add to favorites first.', 403);
             }
 
             // Get lesson progress
