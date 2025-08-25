@@ -79,6 +79,7 @@ class CheckoutController extends Controller
             'amount'                  => $order->total_amount,
             'currency'                => strtolower($order->currency ?? 'usd'),
             'response_payload'        => $payload,
+            'type' => 'payment',
         ]);
 
 
