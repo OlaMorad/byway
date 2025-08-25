@@ -32,6 +32,12 @@ class LoginController extends Controller
                 'email' => ['Your account has been blocked. Please contact support.'],
             ]);
         }
+
+        if ($user->deletion_requested_at) {
+            $user->deletion_requested_at = null;
+            $user->save();
+        }
+
         // Revoke existing tokens (optional: keep only one active session)
         $user->tokens()->delete();
 
