@@ -251,7 +251,15 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Lessons & Reviews
     Route::post('/lessons/{lessonId}/complete', [CourseProgressController::class, 'completeLesson']);
     Route::post('/courses/{courseId}/review', [CourseProgressController::class, 'submitReview']);
+});
 
+
+
+Route::get('/all-courses', [CourseShowController::class, 'index']);
+Route::get('/course/{id}', [CourseShowController::class, 'show']);
+
+
+Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Enroll in course
     Route::post('/courses/{courseId}/enroll', [EnrollmentController::class, 'enroll']);
 
@@ -259,11 +267,6 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::get('/my-courses', [EnrollmentController::class, 'myCourses']);
 
     // View one enrolled course
-    Route::get('/courses/{courseId}/enrolled', [EnrollmentController::class, 'showEnrolledCourse']);
+    Route::get('/courses/{courseId}', [EnrollmentController::class, 'showEnrolledCourse']);
 });
-
-
-
-Route::get('/all-courses', [CourseShowController::class, 'index']);
-Route::get('/course/{id}', [CourseShowController::class, 'show']);
 
