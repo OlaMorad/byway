@@ -68,6 +68,9 @@ class CheckoutController extends Controller
             'metadata'                   => ['order_id' => (string)$order->id],
         ]);
 
+        $payload = [
+            'payment_method' => 'stripe',
+        ];
 
         Payment::create([
             'user_id'                 => $user->id,
@@ -75,7 +78,7 @@ class CheckoutController extends Controller
             'status'                  => $pi->status ?? 'pending',
             'amount'                  => $order->total_amount,
             'currency'                => strtolower($order->currency ?? 'usd'),
-            'response_payload'        => json_encode($pi->toArray()),
+            'response_payload'        => $payload,
         ]);
 
 
@@ -119,7 +122,7 @@ class CheckoutController extends Controller
         $pi = PaymentIntent::retrieve($payment->stripe_payment_intent_id);
         $pi->confirm();
 
-        $payment->update(['status' => $pi->status, 'response_payload' => $pi->toArray()]);
+        $payment->update(['status' => $pi->status]);
         $order->update(['status' => $pi->status]);
 
         $orderItems = $order->Items()->with('course.user')->get();
@@ -137,6 +140,6 @@ class CheckoutController extends Controller
                 ]));
             }
         }
-        return ApiResponse::sendResponse(200 , 'Payment Intent Confirmed Successfully');
+        return ApiResponse::sendResponse(200, 'Payment Intent Confirmed Successfully');
     }
 }
