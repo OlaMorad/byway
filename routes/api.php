@@ -91,7 +91,6 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::post('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'store']);
     Route::put('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'update']);
     Route::delete('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'destroy']);
-    Route::get('/categories', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
 
     // الدروس
     Route::get('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'index']);
@@ -273,3 +272,5 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // View one enrolled course
     Route::get('/courses/{courseId}/enrolled', [EnrollmentController::class, 'showEnrolledCourse']);
 });
+
+Route::get('/categories-for-platform', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
