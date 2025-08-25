@@ -43,25 +43,24 @@ class LearnerCourseController extends Controller
             $perPage = $request->get('per_page', 15);
             $page = $request->get('page', 1);
 
-            // Get favorite courses with eager loading to avoid N+1 problem
-            $favoriteCourses = Favorite::with([
-                'course.instructor:id,name',
-                'course.lessons:id,course_id',
-                'course.lessons.lessonCompletions' => function ($query) use ($user) {
+            // Get enrolled courses with eager loading to avoid N+1 problem
+            $enrolledCourses = Course::with([
+                'instructor:id,name',
+                'lessons:id,course_id',
+                'lessons.lessonCompletions' => function ($query) use ($user) {
                     $query->where('user_id', $user->id);
+                },
+                'enrollments' => function ($query) use ($user) {
+                    $query->where('learner_id', $user->id);
                 }
             ])
-            ->where('user_id', $user->id)
+            ->whereHas('enrollments', function ($query) use ($user) {
+                $query->where('learner_id', $user->id);
+            })
             ->paginate($perPage, ['*'], 'page', $page);
 
             // Transform the data
-            $courses = $favoriteCourses->getCollection()->map(function ($favorite) use ($user) {
-                $course = $favorite->course;
-                
-                if (!$course) {
-                    return null; // Skip if course doesn't exist
-                }
-
+            $courses = $enrolledCourses->getCollection()->map(function ($course) use ($user) {
                 $totalLessons = $course->lessons->count();
                 $completedLessons = $course->lessons->sum(function ($lesson) {
                     return $lesson->lessonCompletions->count();
@@ -76,18 +75,19 @@ class LearnerCourseController extends Controller
                     'progress' => $progress . '%',
                     'total_lessons' => $totalLessons,
                     'completed_lessons' => $completedLessons,
-                    'favorited_at' => $favorite->created_at?->toISOString(),
+                    'enrolled_at' => $course->enrollments->first()->created_at?->toISOString(),
+                    'enrollment_status' => 'active',
                 ];
-            })->filter(); // Remove null values
+            });
 
             // Prepare pagination data
             $paginationData = [
-                'current_page' => $favoriteCourses->currentPage(),
-                'last_page' => $favoriteCourses->lastPage(),
-                'per_page' => $favoriteCourses->perPage(),
-                'total' => $favoriteCourses->total(),
-                'from' => $favoriteCourses->firstItem(),
-                'to' => $favoriteCourses->lastItem(),
+                'current_page' => $enrolledCourses->currentPage(),
+                'last_page' => $enrolledCourses->lastPage(),
+                'per_page' => $enrolledCourses->perPage(),
+                'total' => $enrolledCourses->total(),
+                'from' => $enrolledCourses->firstItem(),
+                'to' => $enrolledCourses->lastItem(),
             ];
 
             return ApiResponse::sendResponse(200, 'Enrolled courses retrieved successfully.', [
@@ -138,12 +138,9 @@ class LearnerCourseController extends Controller
                 return ApiResponse::sendError('Course not found', 404);
             }
 
-            // Check if user has access to this course (either enrolled or favorited)
             $isEnrolled = Enrollment::where('learner_id', $user->id)
                 ->where('course_id', $courseId)
                 ->exists();
-
-
 
             if (!$isEnrolled) {
                 return ApiResponse::sendError('You do not have access to this course. Please enroll or add to favorites first.', 403);
@@ -159,7 +156,7 @@ class LearnerCourseController extends Controller
                     'lesson_id' => $lesson->id,
                     'title' => $lesson->title,
                     'is_completed' => $isCompleted,
-                    'completed_at' => $isCompleted ? 
+                    'completed_at' => $isCompleted ?
                         LessonCompletion::where('user_id', $user->id)
                             ->where('lesson_id', $lesson->id)
                             ->first()?->created_at?->toISOString() : null,
