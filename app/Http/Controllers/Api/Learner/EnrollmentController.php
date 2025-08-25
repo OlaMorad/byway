@@ -172,7 +172,8 @@ class EnrollmentController extends Controller
                 'title' => $course->title,
                 'description' => $course->description,
                 'price' => $course->price,
-                'image' => $course->image,
+                'image_url' => $course->image_url ? url($course->image_url) : null,
+                'video_url' => $course->video_url ? url($course->video_url) : null,
                 'instructor' => [
                     'id' => $course->instructor?->id ?? 0,
                     'name' => $course->instructor?->name ?? 'Unknown Instructor',
@@ -184,7 +185,7 @@ class EnrollmentController extends Controller
                         'id' => $lesson->id,
                         'title' => $lesson->title,
                         'duration' => $lesson->video_duration ?? 0,
-                        'video_url' => $lesson->video_url,
+                        'video_url' => $lesson->video_url ? url($lesson->video_url) : null,
                     ];
                 }),
                 'reviews' => $course->reviews->map(function ($review) {
