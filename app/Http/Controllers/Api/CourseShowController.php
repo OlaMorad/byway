@@ -18,7 +18,9 @@ class CourseShowController extends Controller
         $query = Course::with([
             'user:id,name,image',
             'category:id,name',
-        ])->where('status', 'published');
+        ])
+        ->withCount(['lessons', 'reviews'])
+        ->where('status', 'published');
 
         if ($request->has('search') && $request->search !== null && $request->search !== '') {
             $search = $request->search;
@@ -44,7 +46,46 @@ class CourseShowController extends Controller
 
         $courses = $query->paginate($perPage);
 
-        return ApiResponse::sendResponse(200, 'Courses retrieved.', $courses);
+        // Transform courses to include image and video URLs with full paths
+        $transformedCourses = $courses->getCollection()->map(function ($course) {
+            return [
+                'id' => $course->id,
+                'title' => $course->title,
+                'description' => $course->description,
+                'price' => $course->price,
+                'status' => $course->status,
+                'image_url' => $course->image_url ? url('public/storage/' . $course->image_url) : null,
+                'video_url' => $course->video_url ? url('public/storage/' . $course->video_url) : null,
+                'lessons_count' => $course->lessons_count ?? 0,
+                'reviews_count' => $course->reviews_count ?? 0,
+                'category' => [
+                    'id' => $course->category?->id,
+                    'name' => $course->category?->name,
+                ],
+                'instructor' => [
+                    'id' => $course->user?->id,
+                    'name' => $course->user?->name,
+                    'image' => $course->user?->image ? url('public/storage/' . $course->user->image) : null,
+                ],
+                'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
+                'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        // Prepare pagination data
+        $paginationData = [
+            'current_page' => $courses->currentPage(),
+            'last_page' => $courses->lastPage(),
+            'per_page' => $courses->perPage(),
+            'total' => $courses->total(),
+            'from' => $courses->firstItem(),
+            'to' => $courses->lastItem(),
+        ];
+
+        return ApiResponse::sendResponse(200, 'Courses retrieved.', [
+            'courses' => $transformedCourses,
+            'pagination' => $paginationData,
+        ]);
     }
 
     /**
@@ -69,22 +110,23 @@ class CourseShowController extends Controller
             'title' => $course->title,
             'description' => $course->description,
             'price' => $course->price,
-            'image' => $course->image,
-            'created_at' => $course->created_at,
-            'updated_at' => $course->updated_at,
+            'image_url' => $course->image_url ? url('public/storage/' . $course->image_url) : null,
+            'video_url' => $course->video_url ? url('public/storage/' . $course->video_url) : null,
+            'status' => $course->status,
+            'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
+            'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
 
             'instructor' => [
                 'id' => $course->user?->id,
                 'name' => $course->user?->name,
                 'about' => $course->user?->about ?? 'No bio available',
-                'image' => $course->user?->image ? url('storage/' . $course->user->image) : null,
+                'image' => $course->user?->image ? url('public/storage/' . $course->user->image) : null,
             ],
 
             'content' => $course->lessons->map(function ($lesson) {
                 return [
                     'id' => $lesson->id,
                     'title' => $lesson->title,
-                    'video_url' => $lesson->video_url,
                 ];
             }),
 
