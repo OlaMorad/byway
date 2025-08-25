@@ -20,12 +20,13 @@ class CourseShowController extends Controller
             'category:id,name',
         ])
         ->withCount(['lessons', 'reviews'])
+        ->withAvg('reviews', 'rating')
         ->where('status', 'published');
 
         // Check if user is authenticated
         $user = $request->user();
         $isAuthenticated = $user !== null;
-        
+
         // If user is authenticated, get their favorite course IDs for efficient checking
         $favoriteCourseIds = collect();
         if ($isAuthenticated) {
@@ -70,9 +71,15 @@ class CourseShowController extends Controller
                 'status' => $course->status,
                 'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
                 'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
-                'lessons_count' => $course->lessons_count ?? 0,
-                'reviews_count' => $course->reviews_count ?? 0,
-                'is_favorite' => $isFavorite,
+                            'lessons_count' => $course->lessons_count ?? 0,
+            'reviews_count' => $course->reviews_count ?? 0,
+            'average_rating' => round($course->reviews_avg_rating ?? 0, 1),
+            'rating_info' => [
+                'average' => round($course->reviews_avg_rating ?? 0, 1),
+                'total_reviews' => $course->reviews_count ?? 0,
+                'has_reviews' => ($course->reviews_count ?? 0) > 0,
+            ],
+            'is_favorite' => $isFavorite,
                 'category' => [
                     'id' => $course->category?->id,
                     'name' => $course->category?->name,
@@ -113,7 +120,10 @@ class CourseShowController extends Controller
             'lessons:id,course_id,title,video_url',
             'reviews:user_id,course_id,rating,review,created_at',
             'reviews.user:id,name', // reviewer name
-        ])->find($id);
+        ])
+        ->withCount(['lessons', 'reviews'])
+        ->withAvg('reviews', 'rating')
+        ->find($id);
 
         if (!$course) {
             return ApiResponse::sendError('Course not found.', 404);
@@ -123,7 +133,7 @@ class CourseShowController extends Controller
         $user = $request->user();
         $isAuthenticated = $user !== null;
         $isFavorite = false;
-        
+
         if ($isAuthenticated) {
             $isFavorite = \App\Models\Favorite::where('user_id', $user->id)
                 ->where('course_id', $course->id)
@@ -140,6 +150,14 @@ class CourseShowController extends Controller
             'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
             'status' => $course->status,
             'is_favorite' => $isFavorite,
+            'lessons_count' => $course->lessons_count ?? 0,
+            'reviews_count' => $course->reviews_count ?? 0,
+            'average_rating' => round($course->reviews_avg_rating ?? 0, 1),
+            'rating_info' => [
+                'average' => round($course->reviews_avg_rating ?? 0, 1),
+                'total_reviews' => $course->reviews_count ?? 0,
+                'has_reviews' => ($course->reviews_count ?? 0) > 0,
+            ],
             'created_at' => $course->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $course->updated_at?->format('Y-m-d H:i:s'),
 
@@ -161,13 +179,11 @@ class CourseShowController extends Controller
                 return [
                     'rating' => $review->rating,
                     'review' => $review->review,
+                    'user_image' => $review->user?->image,
                     'learner_name' => $review->user?->name ?? 'Unknown',
                     'created_at' => $review->created_at->diffForHumans(),
                 ];
             }),
-
-
-            'average_rating' => round($course->reviews->avg('rating'), 1),
         ]);
     }
 }
