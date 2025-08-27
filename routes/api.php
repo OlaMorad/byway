@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Api\CourseManagementController;
+use App\Http\Controllers\Api\InstructorCourseManagementController;
 use App\Http\Controllers\Api\InstructorPublicController;
 use App\Http\Controllers\Api\InstructorStripeController;
 use App\Http\Controllers\Api\PlatformSettingsController;
@@ -86,11 +87,11 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->group(function () {
 // =====================================================================
 Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/course-management')->group(function () {
     // الكورسات
-    Route::get('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'index']);
-    Route::get('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'show']);
-    Route::post('/courses', [App\Http\Controllers\Api\CourseManagementController::class, 'store']);
-    Route::put('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'update']);
-    Route::delete('/courses/{id}', [App\Http\Controllers\Api\CourseManagementController::class, 'destroy']);
+    Route::get('/courses', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'index']);
+    Route::get('/courses/{id}', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'show']);
+    Route::post('/courses', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'store']);
+    Route::put('/courses/{id}', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'update']);
+    Route::delete('/courses/{id}', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'destroy']);
 
     // الدروس
     Route::get('/courses/{courseId}/lessons', [App\Http\Controllers\Api\LessonManagementController::class, 'index']);
@@ -100,6 +101,8 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::delete('/courses/{courseId}/lessons/{lessonId}', [App\Http\Controllers\Api\LessonManagementController::class, 'destroy']);
     Route::post('/courses/{courseId}/lessons/{lessonId}/materials', [App\Http\Controllers\Api\LessonManagementController::class, 'uploadMaterial']);
 });
+
+
 
 
 // =====================================================================
@@ -140,15 +143,21 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/instructors/{id}', [UserManagementController::class, 'updateInstructorProfile']);
     Route::get('/instructors/search', [UserManagementController::class, 'searchInstructors']);
 
-    // Courses Management
+    /*
+    |--------------------------------------------------------------------------
+    | Courses Routes
+    |--------------------------------------------------------------------------
+    */
     Route::prefix('courses')->group(function () {
-        Route::get('/', [CourseManagementController::class, 'index']);
-        Route::get('/{id}', [CourseManagementController::class, 'show']);
-        Route::put('/{courseId}', [CourseManagementController::class, 'update']);
-        Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']);
-        Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']);
-        Route::get('/search', [CourseManagementController::class, 'search']);
+        Route::get('/', [CourseManagementController::class, 'index']);             // عرض كل الكورسات
+        Route::get('/{id}', [CourseController::class, 'show']);                     // عرض كورس محدد
+        Route::put('/{courseId}', [CourseManagementController::class, 'update']);   // تعديل كورس
+        Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']); // حذف كورس
+        Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']); // اعتماد كورس
+        Route::get('/search', [CourseManagementController::class, 'search']);      // البحث عن كورس
     });
+
+
 
     // Reviews
     Route::prefix('reviews')->group(function () {
@@ -273,4 +282,4 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::get('/courses/{courseId}/enrolled', [EnrollmentController::class, 'showEnrolledCourse']);
 });
 
-Route::get('/categories-for-platform', [App\Http\Controllers\Api\CourseManagementController::class, 'getCategories']);
+Route::get('/categories-for-platform', [App\Http\Controllers\Api\InstructorCourseManagementController::class, 'getCategories']);
