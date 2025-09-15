@@ -40,26 +40,26 @@ class User extends Authenticatable
         $this->notify(new CustomPasswordReset($token));
     }
 
-    // Accessors for links
-    public function getTwitterLinkAttribute($value)
-    {
-        return $value ?? 'https://twitter.com';
-    }
+    // // Accessors for links
+    // public function getTwitterLinkAttribute($value)
+    // {
+    //     return $value ?? 'https://twitter.com';
+    // }
 
-    public function getLinkedInLinkAttribute($value)
-    {
-        return $value ?? 'https://www.linkedin.com';
-    }
+    // public function getLinkedInLinkAttribute($value)
+    // {
+    //     return $value ?? 'https://www.linkedin.com';
+    // }
 
-    public function getYoutubeLinkAttribute($value)
-    {
-        return $value ?? 'https://www.youtube.com';
-    }
+    // public function getYoutubeLinkAttribute($value)
+    // {
+    //     return $value ?? 'https://www.youtube.com';
+    // }
 
-    public function getFacebookLinkAttribute($value)
-    {
-        return $value ?? 'https://www.facebook.com';
-    }
+    // public function getFacebookLinkAttribute($value)
+    // {
+    //     return $value ?? 'https://www.facebook.com';
+    // }
 
 
     /**
@@ -71,6 +71,9 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'verification_code'
+    ];
+    protected $casts = [
+        'total_earnings' => 'float',
     ];
 
     // Optional helper methods
@@ -99,6 +102,11 @@ class User extends Authenticatable
             'created_at' => 'datetime',
             'deletion_requested_at' => 'datetime',
         ];
+    }
+    // دالة مخصصة بترجع الاسم كامل
+    public function fullName()
+    {
+        return trim("{$this->first_name} {$this->last_name}");
     }
 
     public function reviews()
@@ -134,7 +142,7 @@ class User extends Authenticatable
     }
 
 
-    
+
 
 
     // Check if deletion is pending

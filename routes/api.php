@@ -44,14 +44,16 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/verify-code', [RegisterController::class, 'verifyCode']);
 Route::post('/login', [LoginController::class, 'login']);
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'forgotPassword']);
+Route::post('/verify/code', [ForgotPasswordController::class, 'verifyResetCode']);
+Route::post('/new-password', [ForgotPasswordController::class, 'resetPassword']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', fn(Request $request) => $request->user());
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
+    Route::post('/profile', [ProfileController::class, 'update']);
     Route::post('/profile/close-account', [ProfileController::class, 'closeAccount']);
     Route::get('/profile/status', [ProfileController::class, 'status']);
 });

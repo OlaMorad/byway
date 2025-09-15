@@ -20,9 +20,22 @@ class UserManagementServices
     // عرض اليوزر بروفايل
     public function userProfile($userId)
     {
-        $user = User::select('id', 'name', 'email', 'role', 'status', 'nationality', 'created_at')
-            ->findOrFail($userId);
+        $user = User::select('id', 'first_name', 'last_name', 'email', 'role', 'status', 'nationality', 'total_earnings', 'bio', 'created_at')
+            ->find($userId);
 
+        if (!$user) {
+            return ApiResponse::sendError('User not found', 404);
+        }
+
+        $responseData = [
+            'id' => $user->id,
+            'name' => $user->fullName(),
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'nationality' => $user->nationality,
+            'created_at' => $user->created_at,
+        ];
 
         // إذا كان المستخدم Instructor
         if ($user->role === 'instructor') {
@@ -33,18 +46,15 @@ class UserManagementServices
             $averageRating = Review::whereHas('course', function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             })->avg('rating');
-            // جلب البايو والتوتال إيرنينغ من جدول instructor_profiles
-            $instructorProfile = InstructorProfile::where('user_id', $user->id)
-                ->select('bio', 'total_earnings')
-                ->first();
 
-            $user->course_count = $courseCount;
-            $user->bio = $instructorProfile?->bio;
-            $user->total_earnings = $instructorProfile?->total_earnings;
-            $user->average_rating = round($averageRating, 2);
+            // إضافة البيانات الإضافية من جدول users
+            $responseData['bio'] = $user->bio;
+            $responseData['total_earnings'] = $user->total_earnings;
+            $responseData['course_count'] = $courseCount;
+            $responseData['average_rating'] = round($averageRating, 2);
         }
 
-        return ApiResponse::sendResponse(200, 'User profile retrieved successfully', $user);
+        return ApiResponse::sendResponse(200, 'User profile retrieved successfully', $responseData);
     }
     // تغير حالة الحساب
     public function toggleUserStatus($userId)
@@ -210,13 +220,43 @@ class UserManagementServices
 
     public function allInstructors()
     {
-        $instructors = User::with('instructorProfile')
-            ->where('role', 'instructor')
-            ->select('id', 'name', 'email', 'status', 'nationality', 'created_at')
-            ->get();
+        $instructors = User::where('role','instructor')
+            ->select(
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'status',
+                'nationality',
+                'bio',
+                'total_earnings',
+                'twitter_link',
+                'linkedin_link',
+                'youtube_link',
+                'facebook_link',
+                'created_at'
+            )
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->fullName(),
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'nationality' => $user->nationality,
+                    'bio' => $user->bio,
+                    'total_earnings' => $user->total_earnings,
+                    'twitter_link' => $user->twitter_link,
+                    'linkedin_link' => $user->linkedin_link,
+                    'youtube_link' => $user->youtube_link,
+                    'facebook_link' => $user->facebook_link,
+                    'created_at' => $user->created_at,
+                ];
+            });
 
         return ApiResponse::sendResponse(200, 'All instructors retrieved successfully', $instructors);
     }
+
     public function searchInstructors($key)
     {
         if (empty($key)) {

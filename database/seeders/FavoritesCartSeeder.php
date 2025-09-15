@@ -17,11 +17,11 @@ class FavoritesCartSeeder extends Seeder
         $userId = 1; // From UserSeeder
 
         // Favorite: Web Dev + UI/UX
-        Favorite::create(['user_id' => $userId, 'course_id' => 1]);
-        Favorite::create(['user_id' => $userId, 'course_id' => 2]);
+        Favorite::firstOrCreate(['user_id' => $userId, 'course_id' => 1]);
+        Favorite::firstOrCreate(['user_id' => $userId, 'course_id' => 2]);
 
         // Cart: Python + Mobile App
-        Cart::create(['user_id' => $userId, 'course_id' => 3]);
-        Cart::create(['user_id' => $userId, 'course_id' => 4]);
+        Cart::firstOrCreate(['user_id' => $userId, 'course_id' => 3]);
+        Cart::firstOrCreate(['user_id' => $userId, 'course_id' => 4]);
     }
 }

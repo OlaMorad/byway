@@ -33,19 +33,31 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        User::factory(10)->sequence(['role' => 'learner'], ['role' => 'instructor'])->create();
+        // Learners (10)
+        User::factory(10)->create(['role' => 'learner', 'status' => 'Active',]);
+
+        // Instructors (5)
+        User::factory(5)->create(['role' => 'instructor', 'status' => 'Active',]);
+
         $this->call([
             CategorySeeder::class,
         ]);
+
         Course::factory(10)->create();
         Lesson::factory(50)->create();
         Review::factory(50)->create();
+        // تحديث مدة كل كورس لتكون مجموع مدة الدروس التابعة له
+        Course::all()->each(function ($course) {
+            $totalDuration = $course->lessons()->sum('video_duration');
+            $course->update(['duration' => $totalDuration]);
+        });
 
         $this->call([
-            InstructorProfileSeeder::class,
-            UserSeeder::class,
+            CategorySeeder::class,
+            //    InstructorProfileSeeder::class,
+            //    UserSeeder::class,
             PaymentSeeder::class,
-            CourseSeeder::class,
+            //   CourseSeeder::class,
             FavoritesCartSeeder::class,
             NotificationSeeder::class,
             OrderSeeder::class,

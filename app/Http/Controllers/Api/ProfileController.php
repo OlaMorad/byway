@@ -7,10 +7,16 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use App\Helpers\ApiResponse;
+use App\Http\Requests\APi\UpdateProfileRequest;
+use App\Services\AuthService;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected AuthService $auth_service,
+
+    ) {}
     /**
      * Get the authenticated learner's profile.
      */
@@ -41,50 +47,21 @@ class ProfileController extends Controller
     /**
      * Update learner profile.
      */
-    public function update(Request $request)
+    public function update(UpdateProfileRequest $request)
     {
-        $user = $request->user();
-
-        if ($user->role !== 'learner') {
-            return ApiResponse::sendError('Unauthorized.', 403);
-        }
-
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'headline' => 'nullable|string|max:255',
-            'about' => 'nullable|string|max:1000',
-            'twitter_link' => 'nullable|url',
-            'linkedin_link' => 'nullable|url',
-            'youtube_link' => 'nullable|url',
-            'facebook_link' => 'nullable|url',
-            'image' => 'nullable|string',
-        ]);
-
-        // Update user profile
-        $user->first_name = $request->first_name;
-        $user->last_name = $request->last_name;
-        $user->image = $request->image;
-        $user->headline = $request->headline;
-        $user->about = $request->about;
-        $user->twitter_link = $request->twitter_link;
-        $user->linkedin_link = $request->linkedin_link;
-        $user->youtube_link = $request->youtube_link;
-        $user->facebook_link = $request->facebook_link;
-
-        $user->save();
+        $user = $this->auth_service->updateProfile($request->validated());
 
         return ApiResponse::sendResponse(200, 'Profile updated successfully.', [
             'user' => [
-                'id' => $user->id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'image' => $user->image,
-                'headline' => $user->headline,
-                'about' => $user->about,
-                'twitter_link' => $user->twitter_link,
+                'id'            => $user->id,
+                'first_name'    => $user->first_name,
+                'last_name'     => $user->last_name,
+                'image' => asset($user->image) ? asset('storage/' . $user->image) : null,
+                'bio'      => $user->bio,
+                'about'         => $user->about,
+                'twitter_link'  => $user->twitter_link,
                 'linkedin_link' => $user->linkedin_link,
-                'youtube_link' => $user->youtube_link,
+                'youtube_link'  => $user->youtube_link,
                 'facebook_link' => $user->facebook_link,
             ]
         ]);

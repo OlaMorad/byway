@@ -23,7 +23,7 @@ class ReviewFactory extends Factory
             'user_id' => User::where('role', 'learner')->inRandomOrder()->first()->id,
             'course_id' => Course::inRandomOrder()->first()->id,
             'rating' => $rating = fake()->numberBetween(1, 5),
-           'review' => fake()->paragraph(),
+            'review' => fake()->paragraph(),
             'status' => $rating < 3 ? 'Reported' : 'Normal',
         ];
     }

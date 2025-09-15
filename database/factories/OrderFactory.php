@@ -19,7 +19,7 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::where('role', '!=', 'admin')->inRandomOrder()->first()?->id ?? User::factory(),
+            'user_id' => User::where('role', 'learner')->inRandomOrder()->first()?->id ?? User::factory(),
             'total_amount' => $this->faker->randomFloat(2, 50, 2000),
             'payment_id' => Payment::inRandomOrder()->first()?->id ?? Payment::factory(),
             'status' => $this->faker->randomElement(['pending', 'completed', 'cancelled']),

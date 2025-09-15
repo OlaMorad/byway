@@ -13,10 +13,22 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            //   $table->string('name');
+            // Profile fields
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+         //   $table->text('headline')->nullable();
+            $table->text('about')->nullable();
+            $table->text('bio')->nullable();
+            $table->decimal('total_earnings', 10, 2)->default(0);
+            // Links
+            $table->string('twitter_link')->nullable();
+            $table->string('linkedin_link')->nullable();
+            $table->string('youtube_link')->nullable();
+            $table->string('facebook_link')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->text('image')->nullable();
             $table->enum('role', ["learner", "instructor", "admin"]);
             $table->enum('status', ["Active", "Blocked"]);
