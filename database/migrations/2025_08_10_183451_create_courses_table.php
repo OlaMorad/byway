@@ -20,8 +20,8 @@ return new class extends Migration
             $table->text('description');
             $table->string('image_url')->nullable(); // صورة الكورس
             $table->string('video_url')->nullable(); // فيديو الكورس
-            $table->integer('duration')->default(0); // مدة الكورس بالثواني
-            $table->enum('status', ["published","pending", "draft"])->default('draft');
+         //   $table->integer('duration')->default(0); // مدة الكورس بالثواني
+            $table->enum('status', ["published","pending"])->default('pending');
             $table->decimal('price', 10, 2);
             $table->foreignId('category_id')->references('id')->on('categories')->nullable()->onDelete('cascade');
             $table->timestamps();

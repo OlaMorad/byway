@@ -37,7 +37,7 @@ class PaymentManagementService
 
     public function getAllPayments()
     {
-        $payments = Payment::with(['user:id,name'])
+        $payments = Payment::with(['user:id,first_name,last_name'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -46,7 +46,7 @@ class PaymentManagementService
             return [
                 'id' => $payment->id,
                 'date' => $payment->created_at->format('Y-m-d'),
-                'user_name' => $payment->user?->name ?? null,
+                'user_name' => $payment->user ? $payment->user->fullName() : null,
                 'type' => $payment->type,
                 'amount' => (float) $payment->amount,
                 'status' => $payment->status,
@@ -100,7 +100,7 @@ class PaymentManagementService
         // لو النوع withdrawal
         if ($payment->type === 'withdrawal') {
             $data = [
-                'instructor' => $payment->user?->name,
+                'instructor'   => $payment->user ? $payment->user->fullName() : null,
                 'request_date' => $payment->created_at->format('Y-m-d'),
                 'amount'       => (float) $payment->amount,
                 'method'       => $method,
@@ -125,7 +125,7 @@ class PaymentManagementService
                 ->all();
 
             $data = [
-                'student'      => $payment->user?->name,
+                'student'      => $payment->user ? $payment->user->fullName() : null,
                 'payment_date' => $payment->created_at->format('Y-m-d'),
                 'course'       => $courses,
                 'method'       => $method,

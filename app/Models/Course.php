@@ -70,7 +70,7 @@ class Course extends Model
         $array = [
             'id'             => $this->id,
             'title'          => $this->title,
-            'instructor_name' => $this->instructor?->name,
+            'instructor_name' => $this->user->fullName(),
             'category_name'  => $this->category?->name,
             'status'         => $this->status,
         ];

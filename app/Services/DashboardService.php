@@ -36,7 +36,7 @@ class DashboardService
     {
         $courses = Course::withAvg('reviews', 'rating')
             ->withCount('reviews')
-            ->with('user:id,name')
+            ->with('user:id,first_name,last_name')
             ->orderByDesc('reviews_avg_rating')
             ->take(5)
             ->get(['id', 'title', 'user_id'])
@@ -46,7 +46,7 @@ class DashboardService
                     'title' => $course->title,
                     'average_rating' => round($course->reviews_avg_rating ?? 0, 2),
                     'reviews_count' => $course->reviews_count ?? 0,
-                    'instructor_name' => $course->user->name ?? null,
+                    'instructor_name' => $course->user ? $course->user->fullName() : null,
                 ];
             });
 
@@ -62,7 +62,7 @@ class DashboardService
             ->map(function ($payment) {
                 $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
                 return [
-                    'customer' => $payment->user->name ?? null,
+                    'customer' => $payment->user ? $payment->user->fullName() : null,
                     'date'          => $payment->created_at->format('Y-m-d'),
                     'method'   => $payload['payment_method'] ?? null,
                     'amount'        => (float) $payment->amount,

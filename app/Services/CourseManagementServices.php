@@ -10,7 +10,7 @@ class CourseManagementServices
     // عرض كل الكورسات
     public function getAllCourses($filters = [])
     {
-        $coursesQuery = Course::with(['user:id,name', 'category:id,name'])
+        $coursesQuery = Course::with(['user:id,first_name,last_name', 'category:id,name'])
             ->select('id', 'title', 'status', 'created_at', 'user_id', 'category_id');
 
         // فلترة حسب category_id
@@ -29,7 +29,7 @@ class CourseManagementServices
                 'title' => $course->title,
                 'status' => $course->status,
                 'created_at' => $course->created_at->format('Y:m:d'),
-                'instructor_name' => $course->user->name ?? null,
+                'instructor_name' => $course->user ? $course->user->fullName() : null,
                 'category_name' => $course->category->name ?? null,
             ];
         });
@@ -85,7 +85,7 @@ class CourseManagementServices
             'price'       => $data['price'] ?? $course->price,
             'category_id' => $data['category_id'] ?? $course->category_id,
         ]);
-        $course->load(['user:id,name', 'category:id,name']);
+        $course->load(['user:id,first_name,last_name', 'category:id,name']);
 
         $CourseData = [
             'id' => $course->id,
@@ -93,8 +93,8 @@ class CourseManagementServices
             'description' => $course->description,
             'video_url' => $course->video_url,
             'status' => $course->status,
-            'price' => $course->price,
-            'instructor_name' => $course->user->name ?? null,
+            'price' => (float)$course->price,
+            'instructor_name' => $course->user ? $course->user->fullName() : null,
             'category_name' => $course->category->name ?? null,
             'created_at' => $course->created_at->format('Y:m:d'),
 
@@ -105,7 +105,7 @@ class CourseManagementServices
     public function getCourseById($courseId)
     {
         $course = Course::with([
-            'user:id,name,email',
+            'user:id,first_name,last_name,email',
             'lessons:id,title,video_url,course_id',
             'reviews' => function ($q) {
                 $q->latest()->take(5)->with('user:id,name');
@@ -120,7 +120,7 @@ class CourseManagementServices
             'title'            => $course->title,
             'description'      => $course->description,
             'video_url'        => $course->video_url,
-            'instructor_name'  => $course->user->name ?? null,
+            'instructor_name' => $course->user ? $course->user->fullName() : null,
 
             // الدروس
             'lessons' => $course->lessons->map(function ($lesson) {
@@ -158,7 +158,7 @@ class CourseManagementServices
         // بحث باستخدام لارافيل سكوت
         $courses = Course::search($filters)
             ->query(function ($query) {
-                $query->with(['user:id,name', 'category:id,name']);
+                $query->with(['user:id,first_name,last_name', 'category:id,name']);
             })
             ->get();
         if ($courses->isEmpty()) {
@@ -170,7 +170,7 @@ class CourseManagementServices
                 'title'          => $course->title,
                 'status'         => $course->status,
                 'created_at'     => $course->created_at->format('Y:m:d'),
-                'instructor_name' => $course->user->name ?? null,
+                'instructor_name' => $course->user ? $course->user->fullName() : null,
                 'category_name'  => $course->category->name ?? null,
             ];
         });

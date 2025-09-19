@@ -59,6 +59,7 @@ class ProfileController extends Controller
                 'image' => asset($user->image) ? asset('storage/' . $user->image) : null,
                 'bio'      => $user->bio,
                 'about'         => $user->about,
+                'nationality'   => $user->nationality,
                 'twitter_link'  => $user->twitter_link,
                 'linkedin_link' => $user->linkedin_link,
                 'youtube_link'  => $user->youtube_link,
@@ -108,5 +109,19 @@ class ProfileController extends Controller
         }
 
         return ApiResponse::sendResponse(200, 'Account status retrieved.', $data);
+    }
+
+    /**
+     * عرض بروفايل الانستركتور حسب الـ ID
+     */
+    public function Show_Instructor_profile($instructorId)
+    {
+        $instructorData = $this->auth_service->getInstructorWithCourses($instructorId);
+
+        if (!$instructorData) {
+            return ApiResponse::sendError('Instructor not found.', 404);
+        }
+
+        return ApiResponse::sendResponse(200, 'Instructor profile fetched successfully.', $instructorData);
     }
 }

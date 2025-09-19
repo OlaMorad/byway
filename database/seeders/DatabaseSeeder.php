@@ -46,14 +46,9 @@ class DatabaseSeeder extends Seeder
         Course::factory(10)->create();
         Lesson::factory(50)->create();
         Review::factory(50)->create();
-        // تحديث مدة كل كورس لتكون مجموع مدة الدروس التابعة له
-        Course::all()->each(function ($course) {
-            $totalDuration = $course->lessons()->sum('video_duration');
-            $course->update(['duration' => $totalDuration]);
-        });
 
         $this->call([
-            CategorySeeder::class,
+          //CategorySeeder::class,
             //    InstructorProfileSeeder::class,
             //    UserSeeder::class,
             PaymentSeeder::class,

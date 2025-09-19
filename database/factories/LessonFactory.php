@@ -21,7 +21,7 @@ class LessonFactory extends Factory
             'title' => fake()->sentence(),
             'video_url' => fake()->url(),
             'description' => $this->faker->paragraph,
-            'video_duration' => $this->faker->numberBetween(15,120),
+            'video_duration' => $this->faker->numberBetween(60,3600),
             'course_id' => Course::inRandomOrder()->first()->id,
         ];
     }
