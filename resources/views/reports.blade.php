@@ -5,7 +5,7 @@
     <title>Reports</title>
 </head>
 <body>
-    <h1>📊 General Statistics</h1>
+    <h1> General Statistics</h1>
     <ul>
         <li>Instructors: {{ $general['instructors'] }}</li>
         <li>Learners: {{ $general['learners'] }}</li>
@@ -13,7 +13,7 @@
         <li>Total Earnings: ${{ $general['earnings'] }}</li>
     </ul>
 
-    <h1>📚 Courses Average Ratings</h1>
+    <h1> Courses Average Ratings</h1>
     <table border="1" cellspacing="0" cellpadding="5">
         <thead>
             <tr>

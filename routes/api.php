@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\Learner\NotificationController;
 use App\Http\Controllers\Api\Learner\CourseProgressController;
 use App\Http\Controllers\Api\LearnerPlatformAnalyticsController;
 use App\Http\Controllers\Api\Learner\CourseInteractionController;
+use App\Http\Controllers\Api\ReviewController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -104,8 +105,13 @@ Route::middleware(['auth:sanctum', 'role:instructor'])->prefix('instructor/cours
     Route::post('/courses/{courseId}/lessons/{lessonId}/materials', [App\Http\Controllers\Api\LessonManagementController::class, 'uploadMaterial']);
 });
 
-
-
+// =====================================================================
+// reviews for instructor courses
+// =====================================================================
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/instructor/reviews', [ReviewController::class, 'instructorReviews']);
+    Route::get('instructor/details/{id}',[ProfileController::class, 'Show_Instructor_profile']);
+});
 
 // =====================================================================
 // Admin Routes
@@ -151,12 +157,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('courses')->group(function () {
-        Route::get('/', [CourseManagementController::class, 'index']);             // عرض كل الكورسات
+        Route::get('/', [CourseManagementController::class, 'index']);         // عرض كل الكورسات
+        Route::get('/search', [CourseManagementController::class, 'search']);      // البحث عن كورس
         Route::get('/{id}', [CourseController::class, 'show']);                     // عرض كورس محدد
         Route::put('/{courseId}', [CourseManagementController::class, 'update']);   // تعديل كورس
         Route::delete('/{courseId}', [CourseManagementController::class, 'destroy']); // حذف كورس
         Route::patch('/approve/{id}', [CourseManagementController::class, 'approve']); // اعتماد كورس
-        Route::get('/search', [CourseManagementController::class, 'search']);      // البحث عن كورس
     });
 
 
@@ -198,7 +204,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
         Route::patch('/withdrawals/reject/{id}', [PaymentController::class, 'rejectWithdrawal']);   // رفض سحب
         Route::get('/{id}', [PaymentController::class, 'show']);                   // تفاصيل دفع معينة
     });
-
 });
 
 
@@ -246,7 +251,7 @@ Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     Route::get('/courses/{courseId}/progress', [LearnerCourseController::class, 'getCourseProgress']);
 
     //platform analytics
-    Route::get('/platform-analytics',LearnerPlatformAnalyticsController::class);
+    Route::get('/platform-analytics', LearnerPlatformAnalyticsController::class);
 
     // Favorites
     Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);

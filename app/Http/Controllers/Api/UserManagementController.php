@@ -42,38 +42,38 @@ class UserManagementController extends Controller
         $key = $request->query('key');
         return $this->userManagementServices->searchUsers($key);
     }
-    // تعديل المستخدم
-    public function updateUser(Request $request, $userId)
-    {
-        $validated = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'role' => ['sometimes', 'string', Rule::in(['learner', 'instructor'])],
-        ]);
+    // // تعديل المستخدم
+    // public function updateUser(Request $request, $userId)
+    // {
+    //     $validated = $request->validate([
+    //         'name' => ['sometimes', 'string', 'max:255'],
+    //         'role' => ['sometimes', 'string', Rule::in(['learner', 'instructor'])],
+    //     ]);
 
-        return $this->userManagementServices->updateUser($userId, $validated);
-    }
-    // عرض كل الاساتذة
-    public function allInstructors()
-    {
-        return $this->userManagementServices->allInstructors();
-    }
-    // اضافة استاذ
-    public function addInstructor(AddInstructorRequest $request)
-    {
-        $data = $request->validated();
-        return $this->userManagementServices->addInstructor($data);
-    }
+    //     return $this->userManagementServices->updateUser($userId, $validated);
+    // }
+    // // عرض كل الاساتذة
+    // public function allInstructors()
+    // {
+    //     return $this->userManagementServices->allInstructors();
+    // }
+    // // اضافة استاذ
+    // public function addInstructor(AddInstructorRequest $request)
+    // {
+    //     $data = $request->validated();
+    //     return $this->userManagementServices->addInstructor($data);
+    // }
     // تعديل معلومات استاذ
-    public function updateInstructorProfile(UpdateInstructorRequest $request, $id)
-    {
-        return $this->userManagementServices->updateInstructor($request->validated(), $id);
-    }
+    // public function updateInstructorProfile(UpdateInstructorRequest $request, $id)
+    // {
+    //     return $this->userManagementServices->updateInstructor($request->validated(), $id);
+    // }
     // بحث
-    public function searchInstructors(Request $request)
-    {
-        $key = $request->query('key');
-        return $this->userManagementServices->searchInstructors($key);
-    }
+    // public function searchInstructors(Request $request)
+    // {
+    //     $key = $request->query('key');
+    //     return $this->userManagementServices->searchInstructors($key);
+    // }
 
     public function addAdmin(AddAdminRequest $request)
     {

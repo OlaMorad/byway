@@ -81,7 +81,7 @@ class ReportsService
 
         // خزنه بالـ storage/public/reports
         Storage::disk('public')->put('reports/' . $fileName, $pdf->output());
-        $link = asset('public/storage/reports/' . $fileName);
+        $link = asset('storage/reports/' . $fileName);
         // رجّع الرابط فقط بالـ data
         return ApiResponse::sendResponse(200, 'Report as pdf generated successfully', $link);
     }

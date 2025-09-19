@@ -24,9 +24,6 @@ class CourseFactory extends Factory
             'description' => $this->faker->paragraph,
             'image_url' => $this->faker->url,
             'video_url' => $this->faker->url,
-            'duration' => 0,
-            //'duration' => $this->faker->numberBetween(30, 180), // مدة الكورس بالدقائق
-            //'duration' => $this->faker->numberBetween(0, 3) . ':' . $this->faker->numberBetween(0, 59),
             'status' => $this->faker->randomElement(['published', 'pending']),
             'price' => $this->faker->randomFloat(2, 0, 1000),
             'category_id' =>  Category::inRandomOrder()->first()->id,

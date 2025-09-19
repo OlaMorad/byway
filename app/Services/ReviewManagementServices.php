@@ -10,7 +10,7 @@ class ReviewManagementServices
     public function getAllReview($instructorId = null)
     {
         // بناء الاستعلام الأساسي مع الـ relations
-        $reviewsQuery = Review::with(['user:id,name', 'course:id,title,user_id']);
+        $reviewsQuery = Review::with(['user:id,first_name,last_name', 'course:id,title,user_id']);
 
         // إذا تم تمرير instructorId، فلتر على أساس user_id للكورس
         if (!empty($instructorId)) {
@@ -23,7 +23,7 @@ class ReviewManagementServices
             return [
                 'id'          => $review->id,
                 'course_name' => $review->course->title ?? null,
-                'reviewer'    => $review->user->name ?? null,
+                'reviewer'    => $review->user ? $review->user->fullName() : null,
                 'rating'      => $review->rating,
                 'comment'     => $review->review,
                 'date'        => $review->created_at->format('Y-m-d'),
@@ -39,12 +39,12 @@ class ReviewManagementServices
 
     public function showReview($reviewId)
     {
-        $review = Review::with(['user:id,name', 'course:id,title'])
+        $review = Review::with(['user:id,first_name,last_name', 'course:id,title'])
             ->findOrFail($reviewId);
 
         $reviewData = [
             'course'  => $review->course->title ?? null,
-            'reviewer'     => $review->user->name ?? null,
+            'reviewer'    => $review->user ? $review->user->fullName() : null,
             'comment'      => $review->review,
             'date'   => $review->created_at->format('Y:m:d'),
         ];

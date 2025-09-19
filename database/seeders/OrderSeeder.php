@@ -15,7 +15,7 @@ class OrderSeeder extends Seeder
     public function run(): void
     {
         // إنشاء 20 أوردر
-        Order::factory()->count(20)->create()->each(function ($order) {
+        Order::factory()->count(100)->create()->each(function ($order) {
             // لكل أوردر نضيف 1-5 OrderItems
             OrderItem::factory()->count(rand(1, 5))->create([
                 'order_id' => $order->id,

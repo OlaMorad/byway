@@ -8,12 +8,13 @@ use App\Models\OrderItem;
 use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class InstructorRevenueController extends Controller
 {
-    public function analytics(Request $request)
+    public function analytics()
     {
-        $instructor = $request->user();
+        $instructor = Auth::user();
         $totalSales = OrderItem::whereHas('course', function ($q) use ($instructor) {
             $q->where('user_id', $instructor->id);
         })
@@ -25,6 +26,7 @@ class InstructorRevenueController extends Controller
 
 
         $withdrawals = Payment::where('user_id', $instructor->id)
+            ->where('type', 'withdrawal')
             ->where('status', 'succeeded')
             ->sum('amount');
 
@@ -35,7 +37,11 @@ class InstructorRevenueController extends Controller
             ->latest()
             ->first();
 
-        return ApiResponse::sendResponse(200, 'Revenue analytics retrieved successfully', ['total_profits' => round($totalProfits), 'available_balance' => round($availableBalance), 'last_transaction' => round($lastTransaction->amount ?? null) 
-        , 'minimum_withdrawal' => Setting::value('withdrawal') ?? 100]);
+        return ApiResponse::sendResponse(200, 'Revenue analytics retrieved successfully', [
+            'total_profits' => round($totalProfits),
+            'available_balance' => round($availableBalance),
+            'last_transaction' => round($lastTransaction->amount ?? null),
+            'minimum_withdrawal' => Setting::value('withdrawal') ?? 50
+        ]);
     }
 }
