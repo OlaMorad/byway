@@ -245,13 +245,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // =====================================================================
 // Learner
 // =====================================================================
+//platform analytics
+Route::get('/platform-analytics', LearnerPlatformAnalyticsController::class);
+
 Route::middleware('auth:sanctum')->prefix('learner')->group(function () {
     // Courses
     Route::get('/courses', [LearnerCourseController::class, 'index']);
     Route::get('/courses/{courseId}/progress', [LearnerCourseController::class, 'getCourseProgress']);
 
-    //platform analytics
-    Route::get('/platform-analytics', LearnerPlatformAnalyticsController::class);
 
     // Favorites
     Route::post('/favorites/add', [CourseInteractionController::class, 'addToFavorites']);

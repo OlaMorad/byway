@@ -16,7 +16,7 @@ class CourseShowController extends Controller
     public function index(Request $request)
     {
         $query = Course::with([
-            'user:id,name,image',
+            'user:id,first_name,last_name,image',
             'category:id,name',
         ])
             ->withCount(['lessons', 'reviews'])
