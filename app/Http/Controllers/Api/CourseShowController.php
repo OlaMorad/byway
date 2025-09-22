@@ -69,8 +69,8 @@ class CourseShowController extends Controller
                 'description' => $course->description,
                 'price' => $course->price,
                 'status' => $course->status,
-                'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
-                'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
+                'image_url' => $course->image_url ? asset($course->image_url) : null,
+                'video_url' => $course->video_url ? asset($course->video_url) : null,
                 'lessons_count' => $course->lessons_count ?? 0,
                 'reviews_count' => $course->reviews_count ?? 0,
                 'average_rating' => round($course->reviews_avg_rating ?? 0, 1),
@@ -116,10 +116,10 @@ class CourseShowController extends Controller
     public function show(Request $request, $id)
     {
         $course = Course::with([
-            'user:id,name,about,image', // instructor
+            'user:id,first_name,last_name,about,image', // instructor
             'lessons:id,course_id,title,video_url',
             'reviews:user_id,course_id,rating,review,created_at',
-            'reviews.user:id,name', // reviewer name
+            'reviews.user:id,first_name,last_name', // reviewer name
         ])
             ->withCount(['lessons', 'reviews'])
             ->withAvg('reviews', 'rating')
@@ -146,10 +146,10 @@ class CourseShowController extends Controller
             'id' => $course->id,
             'title' => $course->title,
             'description' => $course->description,
-            'price' => $course->price,
+            'price' => (float) ($course->price),
             'image_url' => $course->image_url ? url('public/' . $course->image_url) : null,
             'video_url' => $course->video_url ? url('public/' . $course->video_url) : null,
-            'duration' => $course->lessons_sum_video_duration ?? 0, // المدة الكلية
+            'duration' => (int) ($course->lessons_sum_video_duration ?? 0),
             'status' => $course->status,
             'is_favorite' => $isFavorite,
             'lessons_count' => $course->lessons_count ?? 0,
@@ -165,7 +165,7 @@ class CourseShowController extends Controller
 
             'instructor' => [
                 'id' => $course->user?->id,
-                'name' => $course->user?->name,
+                'name' => $course->user ? $course->user->fullName() : null,
                 'about' => $course->user?->about ?? 'No bio available',
                 'image' => $course->user?->image ? url('public/' . $course->user->image) : null,
             ],
@@ -182,7 +182,7 @@ class CourseShowController extends Controller
                     'rating' => $review->rating,
                     'review' => $review->review,
                     'user_image' => $review->user?->image,
-                    'learner_name' => $review->user?->name ?? 'Unknown',
+                    'learner_name' => $review->user ? $review->user->fullName() : null,
                     'created_at' => $review->created_at->diffForHumans(),
                 ];
             }),

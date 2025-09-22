@@ -121,7 +121,7 @@ public function getCart()
         $userId = request()->user()->id;
 
         $favorites = Favorite::where('user_id', $userId)
-            ->with(['course.user:id,name'])
+            ->with(['course.user:id,first_name,last_name'])
             ->get();
 
         return ApiResponse::sendResponse(200, 'Favorites retrieved.', $favorites);
