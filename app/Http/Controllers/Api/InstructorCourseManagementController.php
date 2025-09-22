@@ -80,7 +80,6 @@ class InstructorCourseManagementController extends Controller
         $course->category_id = $request->category_id;
         $course->price = $request->price;
         $course->user_id = Auth::id();
-        $course->status = 'draft';
 
         // رفع صورة الكورس
         if ($request->hasFile('image')) {
