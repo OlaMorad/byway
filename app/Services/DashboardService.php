@@ -87,7 +87,7 @@ class DashboardService
             ->map(function ($payment) {
                 $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
                 return [
-                    'customer' => $payment->user->name ?? null,
+                    'customer' => $payment->user ? $payment->user->fullName() : null,
                     'date'     => $payment->created_at->format('Y-m-d'),
                     'type' => $payload['payment_method'] ?? null,
                     'amount'   => (float) $payment->amount,

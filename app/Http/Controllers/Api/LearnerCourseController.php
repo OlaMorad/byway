@@ -45,7 +45,7 @@ class LearnerCourseController extends Controller
 
             // Get enrolled courses with eager loading to avoid N+1 problem
             $enrolledCourses = Course::with([
-                'instructor:id,name',
+                'instructor:id,first_name,last_name',
                 'lessons:id,course_id',
                 'lessons.lessonCompletions' => function ($query) use ($user) {
                     $query->where('user_id', $user->id);
@@ -73,7 +73,7 @@ class LearnerCourseController extends Controller
                     'title' => $course->title,
                     "course_image_url" => $course->image_url ? url($course->image_url) : null,
                     "course_video_url" => $course->video_url ? url($course->video_url) : null,
-                    'instructor' => $course->instructor->name ?? 'Unknown',
+                    'instructor' =>  $course->user ? $course->user->fullName() : null,
                     'progress' => $progress . '%',
                     'total_lessons' => $totalLessons,
                     'completed_lessons' => $completedLessons,

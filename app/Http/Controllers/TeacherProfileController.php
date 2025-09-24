@@ -4,22 +4,45 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Models\InstructorProfile;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TeacherProfileController extends Controller
 {
 
     public function show()
     {
-        $teacher = InstructorProfile::where('user_id', auth()->id())
-            ->with('user')
-            ->first();
+        $user=Auth::user()->id;
+        $teacher = User::where('id',$user)->first();
 
         if (!$teacher) {
             return ApiResponse::sendResponse(404, 'Teacher profile not found');
         }
 
-        return ApiResponse::sendResponse(200, 'Teacher profile found successfully', $teacher);
+        // رجع فقط الحقول المطلوبة
+        $data = $teacher->only([
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'about',
+            'bio',
+            'twitter_link',
+            'linkedin_link',
+            'youtube_link',
+            'facebook_link',
+            'role',
+            'status',
+            'nationality',
+        ]);
+
+        // معالجة الصورة
+        $data['image'] = $teacher->image
+            ? asset($teacher->image)
+            : null;
+
+        return ApiResponse::sendResponse(200, 'Teacher profile found successfully', $data);
     }
 
     // update profile
