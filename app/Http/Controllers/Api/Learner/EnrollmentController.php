@@ -154,10 +154,10 @@ class EnrollmentController extends Controller
             }
 
             $course = Course::with([
-                'instructor:id,name',
+                'instructor:id,first_name,last_name',
                 'instructor.instructorProfile',
                 'lessons:id,course_id,title,video_url,video_duration,order',
-                'reviews.user:id,name', // reviews with learner name
+                'reviews.user:id,first_name,last_name', // reviews with learner name
             ])
                 ->withAvg('reviews', 'rating')
                 ->withCount('enrollments')
@@ -176,7 +176,7 @@ class EnrollmentController extends Controller
                 'video_url' => $course->video_url ? url($course->video_url) : null,
                 'instructor' => [
                     'id' => $course->instructor?->id ?? 0,
-                    'name' => $course->instructor?->name ?? 'Unknown Instructor',
+                    'name' => $course->instructor ? $course->instructor->fullName() : null,
                     'bio' => $course->instructor?->bio ?? 'No bio available',
                     'profile_photo' => $course->instructor?->image ? url('storage/' . $course->instructor->image) : null,
                 ],
@@ -193,7 +193,7 @@ class EnrollmentController extends Controller
                         'rating' => $review->rating,
                         'user_image' => $review->user?->image,
                         'review' => $review->review,
-                        'learner_name' => $review->user?->name ?? 'Unknown User',
+                        'learner_name' => $review->user ? $review->user->fullName() : null,
                         'created_at' => $review->created_at->diffForHumans(),
                     ];
                 }),
