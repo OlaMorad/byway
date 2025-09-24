@@ -42,7 +42,11 @@ class PaymentManagementService
             ->paginate(10);
 
         $payments->getCollection()->transform(function ($payment) {
-            $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+            //  $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+            $payload = $payment->response_payload;
+            if (is_string($payload)) {
+                $payload = json_decode($payload, true); 
+            }
             return [
                 'id' => $payment->id,
                 'date' => $payment->created_at->format('Y-m-d'),
