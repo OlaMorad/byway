@@ -19,8 +19,8 @@ class AuthService
         $instructorData = [
             'first_name'    => $instructor->first_name,
             'last_name'     => $instructor->last_name,
-            'image'         => $instructor->image ? asset($instructor->image) : null,
-            'headline'      => $instructor->headline,
+            'image'         => $instructor->image ? asset('storage/' . $instructor->image) : null,
+            'bio'      => $instructor->bio,
             'about'         => $instructor->about,
             'twitter_link'  => $instructor->twitter_link,
             'linkedin_link' => $instructor->linkedin_link,
@@ -28,6 +28,7 @@ class AuthService
             'facebook_link' => $instructor->facebook_link,
         ];
 
+        // الكورسات مرتبة حسب أعلى متوسط تقييم
         $courses = Course::withCount('reviews')
             ->withAvg('reviews', 'rating')
             ->where('user_id', $instructor->id)
@@ -43,12 +44,26 @@ class AuthService
                     'average_rating' => round($course->reviews_avg_rating ?? 0, 2),
                 ];
             });
+
+        // الريفيوهات فقط يلي ريتنغ 4 أو 5
         $reviews = Review::with(['course:id,title', 'user:id,first_name,last_name'])
             ->whereHas('course', function ($query) use ($instructorId) {
                 $query->where('user_id', $instructorId);
             })
-            ->orderByDesc('created_at')
-            ->paginate(10);
+            ->whereIn('rating', [4, 5]) // فقط 4 و 5
+            ->orderByDesc('rating')  // من الأعلى للأدنى
+            ->take(6)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id'        => $review->id,
+                    'course'    => $review->course->title ?? null,
+                    'reviewer'  => $review->user ? ($review->user->first_name . ' ' . $review->user->last_name) : null,
+                    'rating'    => $review->rating,
+                    'comment'   => $review->review,
+                    'date'      => $review->created_at->format('Y-m-d'),
+                ];
+            });
 
         $instructorData['courses'] = $courses;
         $instructorData['reviews'] = $reviews;
@@ -63,7 +78,7 @@ class AuthService
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             // حفظ الصورة في مجلد public/profile_images
             $path = $data['image']->store('profile_images', 'public');
-            $data['image'] = $path; // نخزن المسار في قاعدة البيانات
+            $data['image'] = 'storage/' . $path;
         }
 
         // تحديث جدول users بشكل اختياري

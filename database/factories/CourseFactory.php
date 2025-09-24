@@ -22,7 +22,7 @@ class CourseFactory extends Factory
             'user_id' => User::where('role', 'instructor')->inRandomOrder()->first()->id,
             'title' => $this->faker->sentence,
             'description' => $this->faker->paragraph,
-            'image_url' => $this->faker->url,
+            'image_url' => 'storage/courses/images/images.jpg',
             'video_url' => $this->faker->url,
             'status' => $this->faker->randomElement(['published', 'pending']),
             'price' => $this->faker->randomFloat(2, 0, 1000),

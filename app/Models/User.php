@@ -169,7 +169,7 @@ class User extends Authenticatable
         return [
             'first_name' => $this->first_name,
             'last_name'  => $this->last_name,
-            'full_name'  => $this->fullName(),
+          //  'full_name'  => $this->fullName(),
             'email' => $this->email,
             'role' => $this->role,
             'status' => $this->status,

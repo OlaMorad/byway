@@ -84,21 +84,23 @@ class InstructorCourseManagementController extends Controller
         // رفع صورة الكورس
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('courses/images', 'public');
-            $course->image_url = Storage::url($imagePath);
+            $course->image_url = $imagePath;
         }
 
         // رفع فيديو الكورس
         if ($request->hasFile('video')) {
             $videoPath = $request->file('video')->store('courses/videos', 'public');
-            $course->video_url = Storage::url($videoPath);
+            $course->video_url = $videoPath;
         }
 
         $course->save();
+        $course->image_url = $course->image_url ? asset('storage/' . $course->image_url) : null;
+        $course->video_url = $course->video_url ? asset('storage/' .$course->video_url) : null;
 
         return response()->json([
             'success' => true,
             'message' => 'The course has been created successfully.',
-            'data' => $course->load('category')
+            'data' => $course->load('category', 'user'),
         ], 201);
     }
 
