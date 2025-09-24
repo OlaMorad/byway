@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
+use App\Models\Course;
 use App\Models\InstructorProfile;
+use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,8 +15,8 @@ class TeacherProfileController extends Controller
 
     public function show()
     {
-        $user=Auth::user()->id;
-        $teacher = User::where('id',$user)->first();
+        $userId = Auth::user()->id;
+        $teacher = User::where('id', $userId)->first();
 
         if (!$teacher) {
             return ApiResponse::sendResponse(404, 'Teacher profile not found');
@@ -39,8 +41,45 @@ class TeacherProfileController extends Controller
 
         // معالجة الصورة
         $data['image'] = $teacher->image
-            ? asset($teacher->image)
+            ? asset('storage/' .$teacher->image)
             : null;
+        //  التوب كورس حسب الريتنغ
+        $topCourse = Course::where('user_id', $userId)
+            ->withAvg('reviews', 'rating') // يحسب معدل الريتنغ
+            ->orderByDesc('reviews_avg_rating')
+            ->first();
+
+        $data['courses'] = $topCourse ? [
+            'id'        => $topCourse->id,
+            'title'     => $topCourse->title,
+            'description' =>$topCourse->description,
+            'price'          => $topCourse->price,
+            'image_url'      => $topCourse->image_url ? asset($topCourse->image_url) : null,
+            'avg_rating' => round($topCourse->reviews_avg_rating, 2),
+        ] : [];
+
+        //  آخر 6 ريفيوهات
+        $latestReviews = Review::with(['user:id,first_name,last_name,image', 'course:id,title'])
+            ->whereHas('course', function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            })
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get()
+            ->map(function ($review) {
+                return [
+                    'id'             => $review->id,
+                    'course'         => $review->course->title ?? null,
+                    'reviewer'       => $review->user ? $review->user->fullName() : null,
+                    'reviewer_image' => $review->user && $review->user->image ? asset('storage/' . $review->user->image) : null,
+                    'rating'         => $review->rating,
+                    'comment'        => $review->review,
+                    'status'         => $review->status,
+                    'date'           => $review->created_at->format('Y-m-d'),
+                ];
+            });
+
+        $data['reviews'] = $latestReviews;
 
         return ApiResponse::sendResponse(200, 'Teacher profile found successfully', $data);
     }
