@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiResponse;
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\InstructorProfile;
 use App\Models\Review;
 use App\Models\User;
@@ -60,7 +61,8 @@ class TeacherProfileController extends Controller
 
         // جميع كورسات المدرّس
         $courses = Course::where('user_id', $userId)->pluck('id');
-
+        // إجمالي عدد الطلاب (enrollments)
+        $totalStudents = Enrollment::whereIn('course_id', $courses)->count();
         // إجمالي عدد الريفيوهات
         $totalReviews = Review::whereIn('course_id', $courses)->count();
 
@@ -73,7 +75,7 @@ class TeacherProfileController extends Controller
             $count = Review::whereIn('course_id', $courses)->where('rating', $i)->count();
             $ratingDistribution[$i] = $totalReviews > 0 ? round(($count / $totalReviews) * 100, 2) : 0;
         }
-
+        $data['total_students'] = $totalStudents;
         $data['total_reviews'] = $totalReviews;
         $data['average_rating'] = round($averageRating ?? 0, 2);
         $data['rating_distribution'] = $ratingDistribution;
