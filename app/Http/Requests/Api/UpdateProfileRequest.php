@@ -27,9 +27,17 @@ class UpdateProfileRequest extends FormRequest
             'bio'      => 'sometimes|nullable|string|max:255',
             'about'         => 'sometimes|nullable|string|max:1000',
             'nationality'   => 'sometimes|nullable|string|max:255',
-            'twitter_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?twitter\.com\/[a-zA-Z0-9_]+\/?$/'],
+            'twitter_link' => [
+                'nullable',
+                'url',
+                'regex:/^https?:\/\/(www\.)?(twitter\.com|x\.com)\/[a-zA-Z0-9_]+\/?$/'
+            ],
             'linkedin_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?linkedin\.com\/(in|company)\/[a-zA-Z0-9_-]+\/?$/'],
-            'youtube_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?youtube\.com\/(channel\/|user\/|c\/)?[a-zA-Z0-9_-]+\/?$/'],
+            'youtube_link' => [
+                'nullable',
+                'url',
+                'regex:/^https?:\/\/(www\.)?youtube\.com\/.+$/'
+            ],
             'facebook_link' => ['nullable', 'url', 'regex:/^https?:\/\/(www\.)?facebook\.com\/[a-zA-Z0-9\.]+\/?$/'],
             'image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];
