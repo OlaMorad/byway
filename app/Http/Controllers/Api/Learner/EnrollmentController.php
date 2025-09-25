@@ -81,7 +81,7 @@ class EnrollmentController extends Controller
             $courses = Course::whereHas('enrollments', function ($query) use ($userId) {
                 $query->where('learner_id', $userId);
             })
-                ->with(['instructor:id,name', 'reviews']) // instructor + reviews
+                ->with(['instructor:id,first_name,last_name', 'reviews']) // instructor + reviews
                 ->withAvg('reviews', 'rating')
                 ->withCount('lessons')
                 ->paginate($perPage, ['*'], 'page', $page);
@@ -92,8 +92,11 @@ class EnrollmentController extends Controller
                     'title' => $course->title,
                     'description' => $course->description,
                     'price' => $course->price,
-                    'image' => $course->image,
-                    'instructor' => $course->instructor ? $course->instructor->name : 'Unknown',
+                    'course_image_url' => $course->image_url ? asset('storage/' . $course->image_url) : null,
+                    'course_video_url' =>  $course->video_url ? asset('storage/' . $course->video_url) : null,
+                    'instructor'         => $course->instructor
+                        ? $course->instructor->first_name . ' ' . $course->instructor->last_name
+                        : null,
                     'rating' => round($course->reviews_avg_rating ?? 0, 1),
                     'lessons_count' => $course->lessons_count,
                     'enrolled_at' => $course->enrollments->first()->created_at->diffForHumans(),
@@ -172,8 +175,8 @@ class EnrollmentController extends Controller
                 'title' => $course->title,
                 'description' => $course->description,
                 'price' => $course->price,
-                'image_url' => $course->image_url ? url($course->image_url) : null,
-                'video_url' => $course->video_url ? url($course->video_url) : null,
+                'image_url' => $course->image_url ? asset('storage/' . $course->image_url) : null,
+                'video_url' => $course->video_url ? asset('storage/' . $course->video_url) : null,
                 'instructor' => [
                     'id' => $course->instructor?->id ?? 0,
                     'name' => $course->instructor ? $course->instructor->fullName() : null,
