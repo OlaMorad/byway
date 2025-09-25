@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -39,12 +40,20 @@ class AuthService
                     'id'             => $course->id,
                     'title'          => $course->title,
                     'price'          => $course->price,
+                    'description' => $course->description,
                     'image_url'      => $course->image_url ? asset($course->image_url) : null,
                     'reviews_count'  => $course->reviews_count,
                     'average_rating' => round($course->reviews_avg_rating ?? 0, 2),
                 ];
             });
+        // حساب الإحصائيات الرئيسية لكل الكورسات
+        $totalStudents = Enrollment::whereIn('course_id', $courses->pluck('id'))->count();
+        $averageRating = $courses->avg('average_rating');
 
+        $keyStatistics = [
+            'total_students' => $totalStudents,
+            'average_rating' => round($averageRating ?? 0, 2),
+        ];
         // الريفيوهات فقط يلي ريتنغ 4 أو 5
         $reviews = Review::with(['course:id,title', 'user:id,first_name,last_name'])
             ->whereHas('course', function ($query) use ($instructorId) {
@@ -64,7 +73,7 @@ class AuthService
                     'date'      => $review->created_at->format('Y-m-d'),
                 ];
             });
-
+        $instructorData['statistics'] = $keyStatistics;
         $instructorData['courses'] = $courses;
         $instructorData['reviews'] = $reviews;
 

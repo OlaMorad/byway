@@ -58,6 +58,25 @@ class TeacherProfileController extends Controller
             'avg_rating' => round($topCourse->reviews_avg_rating, 2),
         ] : [];
 
+        // جميع كورسات المدرّس
+        $courses = Course::where('user_id', $userId)->pluck('id');
+
+        // إجمالي عدد الريفيوهات
+        $totalReviews = Review::whereIn('course_id', $courses)->count();
+
+        // متوسط التقييم
+        $averageRating = Review::whereIn('course_id', $courses)->avg('rating');
+
+        // النسبة المئوية لكل تقييم من 1 لـ 5
+        $ratingDistribution = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $count = Review::whereIn('course_id', $courses)->where('rating', $i)->count();
+            $ratingDistribution[$i] = $totalReviews > 0 ? round(($count / $totalReviews) * 100, 2) : 0;
+        }
+
+        $data['total_reviews'] = $totalReviews;
+        $data['average_rating'] = round($averageRating ?? 0, 2);
+        $data['rating_distribution'] = $ratingDistribution;
         //  آخر 6 ريفيوهات
         $latestReviews = Review::with(['user:id,first_name,last_name,image', 'course:id,title'])
             ->whereHas('course', function ($query) use ($userId) {

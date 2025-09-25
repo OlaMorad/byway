@@ -70,7 +70,7 @@ class CourseShowController extends Controller
                 'price' => $course->price,
                 'status' => $course->status,
                 'image_url' => $course->image_url ? asset($course->image_url) : null,
-                'video_url' => $course->video_url ? asset('storage/' .$course->video_url) : null,
+                'video_url' => $course->video_url ? asset($course->video_url) : null,
                 'lessons_count' => $course->lessons_count ?? 0,
                 'reviews_count' => $course->reviews_count ?? 0,
                 'average_rating' => round($course->reviews_avg_rating ?? 0, 1),
@@ -148,7 +148,7 @@ class CourseShowController extends Controller
             'description' => $course->description,
             'price' => (float) ($course->price),
             'image_url' => $course->image_url ? asset($course->image_url) : null,
-            'video_url' => $course->video_url ? asset('storage/' . $course->video_url) : null,
+            'video_url' => $course->video_url ? asset($course->video_url) : null,
             'duration' => (int) ($course->lessons_sum_video_duration ?? 0),
             'status' => $course->status,
             'is_favorite' => $isFavorite,
@@ -167,7 +167,7 @@ class CourseShowController extends Controller
                 'id' => $course->user?->id,
                 'name' => $course->user ? $course->user->fullName() : null,
                 'about' => $course->user?->about ?? 'No bio available',
-                'image' => $course->user?->image ? url('public/' . $course->user->image) : null,
+                'image' => $course->user?->image ? asset('storage/' . $course->user->image) : null,
             ],
 
             'content' => $course->lessons->map(function ($lesson) {
