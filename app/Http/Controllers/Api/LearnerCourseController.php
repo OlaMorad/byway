@@ -71,8 +71,8 @@ class LearnerCourseController extends Controller
                 return [
                     'course_id' => $course->id,
                     'title' => $course->title,
-                    "course_image_url" => $course->image_url ? url($course->image_url) : null,
-                    "course_video_url" => $course->video_url ? url($course->video_url) : null,
+                    'course_image_url' => $course->image_url ? asset('storage/' . $course->image_url) : null,
+                    'course_video_url' =>  $course->video_url ? asset('storage/' . $course->video_url) : null,
                     'instructor' =>  $course->user ? $course->user->fullName() : null,
                     'progress' => $progress . '%',
                     'total_lessons' => $totalLessons,
