@@ -48,16 +48,20 @@ class TeacherProfileController extends Controller
         $topCourse = Course::where('user_id', $userId)
             ->withAvg('reviews', 'rating') // يحسب معدل الريتنغ
             ->orderByDesc('reviews_avg_rating')
-            ->first();
+            ->take(6)
+            ->get()
+            ->map(function ($course) {
+                return [
+                    'id'             => $course->id,
+                    'title'          => $course->title,
+                    'description'    => $course->description,
+                    'price'          => (float) $course->price,
+                    'image_url'      => $course->image_url ? asset('storage/' . $course->image_url) : null,
+                    'avg_rating'     => round($course->reviews_avg_rating ?? 0, 2),
+                ];
+            });
 
-        $data['courses'] = $topCourse ? [
-            'id'        => $topCourse->id,
-            'title'     => $topCourse->title,
-            'description' =>$topCourse->description,
-            'price'          => $topCourse->price,
-            'image_url'      => $topCourse->image_url ? asset($topCourse->image_url) : null,
-            'avg_rating' => round($topCourse->reviews_avg_rating, 2),
-        ] : [];
+        $data['courses'] = $topCourse;
 
         // جميع كورسات المدرّس
         $courses = Course::where('user_id', $userId)->pluck('id');
@@ -92,7 +96,7 @@ class TeacherProfileController extends Controller
                     'id'             => $review->id,
                     'course'         => $review->course->title ?? null,
                     'reviewer'       => $review->user ? $review->user->fullName() : null,
-                    'reviewer_image' => $review->user && $review->user->image ? asset('storage/' . $review->user->image) : null,
+                    'reviewer_image' => $review->user && $review->user->image ? asset($review->user->image) : null,
                     'rating'         => $review->rating,
                     'comment'        => $review->review,
                     'status'         => $review->status,
