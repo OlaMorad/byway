@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Helpers\ApiResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -66,67 +67,55 @@ class EnrollmentController extends Controller
     public function myCourses(Request $request)
     {
         try {
-            // Validate request
-            $request->validate([
-                'per_page' => 'sometimes|integer|min:1|max:100',
-                'page' => 'sometimes|integer|min:1'
-            ]);
+            $user = Auth::user();
 
-            $userId = $request->user()->id;
+            // جلب الكورسات يلي المستخدم مسجل فيها
+            $enrollments = Enrollment::with(['course.instructor', 'course.lessons'])
+                ->where('user_id', $user->id)
+                ->paginate(15);
 
-            // Get pagination parameters
-            $perPage = $request->get('per_page', 15);
-            $page = $request->get('page', 1);
+            // تجهيز البيانات للريسبونس
+            $courses = $enrollments->map(function ($enrollment) {
+                $course = $enrollment->course;
 
-            $courses = Course::whereHas('enrollments', function ($query) use ($userId) {
-                $query->where('learner_id', $userId);
-            })
-                ->with(['instructor:id,first_name,last_name', 'reviews']) // instructor + reviews
-                ->withAvg('reviews', 'rating')
-                ->withCount('lessons')
-                ->paginate($perPage, ['*'], 'page', $page);
-
-            $transformedCourses = $courses->getCollection()->map(function ($course) {
                 return [
-                    'id' => $course->id,
-                    'title' => $course->title,
-                    'description' => $course->description,
-                    'price' => $course->price,
+                    'course_id'          => $course->id,
+                    'title'              => $course->title,
                     'course_image_url' => $course->image_url ? asset('storage/' . $course->image_url) : null,
                     'course_video_url' =>  $course->video_url ? asset('storage/' . $course->video_url) : null,
                     'instructor'         => $course->instructor
                         ? $course->instructor->first_name . ' ' . $course->instructor->last_name
                         : null,
-                    'rating' => round($course->reviews_avg_rating ?? 0, 1),
-                    'lessons_count' => $course->lessons_count,
-                    'enrolled_at' => $course->enrollments->first()->created_at->diffForHumans(),
+                    'progress'           => $enrollment->progress . '%',
+                    'total_lessons'      => $course->lessons->count(),
+                    'completed_lessons'  => $enrollment->completed_lessons ?? 0,
+                    'enrolled_at'        => $enrollment->created_at,
+                    'enrollment_status'  => $enrollment->status,
                 ];
             });
 
-            // Prepare pagination data
-            $paginationData = [
-                'current_page' => $courses->currentPage(),
-                'last_page' => $courses->lastPage(),
-                'per_page' => $courses->perPage(),
-                'total' => $courses->total(),
-                'from' => $courses->firstItem(),
-                'to' => $courses->lastItem(),
-            ];
-
-            return ApiResponse::sendResponse(200, 'My courses retrieved.', [
-                'courses' => $transformedCourses,
-                'pagination' => $paginationData,
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Enrolled courses retrieved successfully.',
+                'data'    => [
+                    'courses'    => $courses,
+                    'count'      => $enrollments->total(),
+                    'pagination' => [
+                        'current_page' => $enrollments->currentPage(),
+                        'last_page'    => $enrollments->lastPage(),
+                        'per_page'     => $enrollments->perPage(),
+                        'total'        => $enrollments->total(),
+                        'from'         => $enrollments->firstItem(),
+                        'to'           => $enrollments->lastItem(),
+                    ],
+                ],
             ]);
-
-        } catch (ValidationException $e) {
-            return ApiResponse::sendError('Validation failed', 422, $e->errors());
         } catch (\Exception $e) {
-            Log::error('Error in EnrollmentController@myCourses: ' . $e->getMessage(), [
-                'user_id' => $request->user()?->id,
-                'trace' => $e->getTraceAsString()
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Error retrieving enrolled courses.',
+                'error'   => $e->getMessage(),
             ]);
-
-            return ApiResponse::sendError('An error occurred while retrieving courses. Please try again later.', 500);
         }
     }
 
