@@ -87,7 +87,7 @@ class AuthService
         if (isset($data['image']) && $data['image'] instanceof UploadedFile) {
             // حفظ الصورة في مجلد public/profile_images
             $path = $data['image']->store('profile_images', 'public');
-            $data['image'] = 'storage/' . $path;
+            $data['image'] =$path;
         }
 
         // تحديث جدول users بشكل اختياري
