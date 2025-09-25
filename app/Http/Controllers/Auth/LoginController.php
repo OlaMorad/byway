@@ -52,7 +52,7 @@ class LoginController extends Controller
                 'first_name' => $user->first_name,
                 'last_name' => $user->last_name,
                 'email' => $user->email,
-                'image' => $user->image ? asset($user->image) : null,
+                'image' => $user->image ? asset('storage/' . $user->image) : null,
                 'role' => $user->role,
                 'is_verified' => $user->is_verified,
                 'status' => $user->status,

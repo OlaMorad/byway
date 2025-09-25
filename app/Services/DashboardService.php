@@ -60,10 +60,15 @@ class DashboardService
             ->take($limit)
             ->get()
             ->map(function ($payment) {
-                $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+                ///    $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+                $payload = $payment->response_payload;
+                if (is_string($payload)) {
+                    $payload = json_decode($payload, true);
+                }
                 return [
                     'customer' => $payment->user ? $payment->user->fullName() : null,
                     'date'          => $payment->created_at->format('Y-m-d'),
+                    'type' => $payment->type,
                     'method'   => $payload['payment_method'] ?? null,
                     'amount'        => (float) $payment->amount,
                 ];
@@ -85,7 +90,11 @@ class DashboardService
             ->take($limit)
             ->get()
             ->map(function ($payment) {
-                $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+                // $payload = is_array($payment->response_payload) ? $payment->response_payload : [];
+                $payload = $payment->response_payload;
+                if (is_string($payload)) {
+                    $payload = json_decode($payload, true);
+                }
                 return [
                     'customer' => $payment->user ? $payment->user->fullName() : null,
                     'date'     => $payment->created_at->format('Y-m-d'),

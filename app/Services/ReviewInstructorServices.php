@@ -19,20 +19,7 @@ class ReviewInstructorServices
         if ($courses->isEmpty()) {
             return ApiResponse::sendResponse(200, 'No courses found for this instructor');
         }
-
-        // إجمالي عدد الريفيوهات
-        $totalReviews = Review::whereIn('course_id', $courses)->count();
-
-        // متوسط التقييم
-        $averageRating = Review::whereIn('course_id', $courses)->avg('rating');
-
-        // النسبة المئوية لكل تقييم من 1 لـ 5
-        $ratingDistribution = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $count = Review::whereIn('course_id', $courses)->where('rating', $i)->count();
-            $ratingDistribution[$i] = $totalReviews > 0 ? round(($count / $totalReviews) * 100, 2) : 0;
-        }
-
+        
         // عدد العناصر بالصفحة (إما من البارامز أو افتراضي 10)
         $perPage = request()->get('per_page', 10);
 
@@ -56,17 +43,11 @@ class ReviewInstructorServices
 
         if ($reviews->isEmpty()) {
             return ApiResponse::sendResponse(200, 'No reviews found for your courses', [
-                'total_reviews' => $totalReviews,
-                'average_rating' => round($averageRating ?? 0, 2),
-                'rating_distribution' => $ratingDistribution,
                 'reviews' => [],
             ]);
         }
 
         return ApiResponse::sendResponse(200, 'Reviews retrieved successfully', [
-            'total_reviews' => $totalReviews,
-            'average_rating' => round($averageRating ?? 0, 2),
-            'rating_distribution' => $ratingDistribution,
             'reviews' => $reviews,
         ]);
     }
