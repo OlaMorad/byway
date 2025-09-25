@@ -20,7 +20,7 @@ class AuthService
         $instructorData = [
             'first_name'    => $instructor->first_name,
             'last_name'     => $instructor->last_name,
-            'image'         => $instructor->image ? asset('storage/' . $instructor->image) : null,
+            'image'         => $instructor->image ? asset($instructor->image) : null,
             'bio'      => $instructor->bio,
             'about'         => $instructor->about,
             'twitter_link'  => $instructor->twitter_link,
