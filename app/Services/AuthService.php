@@ -20,7 +20,7 @@ class AuthService
         $instructorData = [
             'first_name'    => $instructor->first_name,
             'last_name'     => $instructor->last_name,
-            'image'         => $instructor->image ? asset($instructor->image) : null,
+            'image'         => $instructor->image ? asset('storage/' .$instructor->image) : null,
             'bio'      => $instructor->bio,
             'about'         => $instructor->about,
             'twitter_link'  => $instructor->twitter_link,
@@ -41,7 +41,7 @@ class AuthService
                     'title'          => $course->title,
                     'price'          => $course->price,
                     'description' => $course->description,
-                    'image_url'      => $course->image_url ? asset($course->image_url) : null,
+                    'image_url'      => $course->image_url ? asset('storage/' .$course->image_url) : null,
                     'reviews_count'  => $course->reviews_count,
                     'average_rating' => round($course->reviews_avg_rating ?? 0, 2),
                 ];
