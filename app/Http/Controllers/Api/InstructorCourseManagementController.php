@@ -24,6 +24,7 @@ class InstructorCourseManagementController extends Controller
         $page = $request->get('page', 1);
 
         $courses = Course::where('user_id', Auth::id())
+            ->withAvg('reviews as average_rating', 'rating')
             ->with(['category', 'lessons'])
             ->withCount(['lessons', 'reviews', 'enrollments'])
             ->orderBy('created_at', 'desc')

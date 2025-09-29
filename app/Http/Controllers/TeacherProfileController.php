@@ -42,11 +42,13 @@ class TeacherProfileController extends Controller
 
         // معالجة الصورة
         $data['image'] = $teacher->image
-            ? asset('storage/' .$teacher->image)
+            ? asset('storage/' . $teacher->image)
             : null;
         //  التوب كورس حسب الريتنغ
         $topCourse = Course::where('user_id', $userId)
-            ->withAvg('reviews', 'rating') // يحسب معدل الريتنغ
+            ->withAvg('reviews', 'rating')
+            // يحسب معدل الريتنغ
+            ->withCount('reviews')
             ->orderByDesc('reviews_avg_rating')
             ->take(6)
             ->get()
@@ -58,6 +60,8 @@ class TeacherProfileController extends Controller
                     'price'          => (float) $course->price,
                     'image_url'      => $course->image_url ? asset('storage/' . $course->image_url) : null,
                     'avg_rating'     => round($course->reviews_avg_rating ?? 0, 2),
+                    'total_reviews'  => $course->reviews_count,
+
                 ];
             });
 

@@ -56,7 +56,7 @@ class ProfileController extends Controller
                 'id'            => $user->id,
                 'first_name'    => $user->first_name,
                 'last_name'     => $user->last_name,
-                'image' => asset($user->image) ? asset($user->image) : null,
+                'image' => asset($user->image) ? asset('storage/' .$user->image) : null,
                 'bio'      => $user->bio,
                 'about'         => $user->about,
                 'nationality'   => $user->nationality,
