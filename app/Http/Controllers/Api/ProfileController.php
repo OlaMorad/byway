@@ -31,15 +31,16 @@ class ProfileController extends Controller
         return ApiResponse::sendResponse(200, 'Profile fetched successfully.', [
             'user' => [
                 'id' => $user->id,
-                'first_name' => $user->first_name,
-                'last_name' => $user->last_name,
-                'image' => $user->image,
-                'headline' => $user->headline,
-                'about' => $user->about,
+                'first_name'   => $user->first_name,
+                'last_name'    => $user->last_name,
+                'image'        => $user->image ? asset('storage/' . $user->image) : null,
+                'bio'          => $user->bio,
+                'about'        => $user->about,
+                'nationality' => $user->nationality,
                 'twitter_link' => $user->twitter_link,
-                'linkedin_link' => $user->linkedin_link,
+                'linkedin_link'=> $user->linkedin_link,
                 'youtube_link' => $user->youtube_link,
-                'facebook_link' => $user->facebook_link,
+                'facebook_link'=> $user->facebook_link,
             ]
         ]);
     }
@@ -56,7 +57,7 @@ class ProfileController extends Controller
                 'id'            => $user->id,
                 'first_name'    => $user->first_name,
                 'last_name'     => $user->last_name,
-                'image' => asset($user->image) ? asset('storage/' .$user->image) : null,
+                'image' => asset($user->image) ? asset('storage/' . $user->image) : null,
                 'bio'      => $user->bio,
                 'about'         => $user->about,
                 'nationality'   => $user->nationality,
