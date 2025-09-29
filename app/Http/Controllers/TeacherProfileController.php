@@ -60,7 +60,7 @@ class TeacherProfileController extends Controller
                     'price'          => (float) $course->price,
                     'image_url'      => $course->image_url ? asset('storage/' . $course->image_url) : null,
                     'avg_rating'     => round($course->reviews_avg_rating ?? 0, 2),
-                    'total_reviews'  => $course->reviews_count,
+                    'reviews_count'  => $course->reviews_count,
 
                 ];
             });
