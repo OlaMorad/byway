@@ -43,9 +43,7 @@ class CourseResource extends JsonResource
                 return LessonResource::collection($this->lessons);
             }),
             'reviews_count' => $this->whenCounted('reviews', $this->reviews_count ?? $this->reviews->count()),
-            'average_rating' => $this->whenLoaded('reviews', function () {
-                return $this->reviews->avg('rating') ?? 0;
-            }),
+            'average_rating' =>round($this->average_rating ?? 0, 2),
             'enrollments_count' => $this->whenCounted('enrollments', $this->enrollments_count ?? $this->enrollments->count()),
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),

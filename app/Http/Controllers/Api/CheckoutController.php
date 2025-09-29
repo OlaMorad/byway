@@ -14,7 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use App\Models\Enrollment;
 use App\Notifications\StudentRegisteredNotification;
+use Carbon\Carbon;
 
 class CheckoutController extends Controller
 {
@@ -55,10 +57,18 @@ class CheckoutController extends Controller
                     'course_id' => $row->course_id,
                     'price'     => $row->course->price,
                 ]);
+
+                //  تسجيل الإنرولمنت مباشرة
+                Enrollment::firstOrCreate([
+                    'learner_id' => $user->id,
+                    'course_id'  => $row->course_id,
+                ], [
+                    'enrolled_at' => Carbon::now(),
+                ]);
             }
+
             return $order;
         });
-
 
         $pi = PaymentIntent::create([
             'amount'                     => (int) round($order->total_amount * 100),
