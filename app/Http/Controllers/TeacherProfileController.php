@@ -100,7 +100,7 @@ class TeacherProfileController extends Controller
                     'id'             => $review->id,
                     'course'         => $review->course->title ?? null,
                     'reviewer'       => $review->user ? $review->user->fullName() : null,
-                    'reviewer_image' => $review->user && $review->user->image ? asset($review->user->image) : null,
+                    'reviewer_image' => $review->user && $review->user->image ? asset('storage/' . $review->user->image) : null,
                     'rating'         => $review->rating,
                     'comment'        => $review->review,
                     'status'         => $review->status,
